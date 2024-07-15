@@ -14,8 +14,18 @@
 		<script type="text/javascript" src="js/libs/jquery-ui.js"></script>
 		<script type="text/javascript" src="js/libs/paper-core.js"></script>
 		<script type="text/javascript" src="js/libs/perlin.js"></script>
+
+		<!--TitleScreen-->
+		<link rel="stylesheet" href="css/TitleScreen.css">
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Rampart+One&display=swap" rel="stylesheet">
+
 	</head>
 	<body>
+		<div class="game-container"></div>
+
 		
 		<!-- remember to register these in the guiHandler! -->
 		<!--  DEPRICATED -- Used for old view options
@@ -52,6 +62,7 @@
 		<div class="menu_div_nonExpanding" id="print"></div>
 		<div class="menu_div_nonExpanding" id="toolbox"></div> -->
 		
+		<script src="js/TitleScreen.js"></script>
 
 		<!-- sewing library files -->
 		<script src="js/libs/FileSaver.js"></script>
@@ -74,7 +85,7 @@
 		<script src="js/designHandler.js"></script> <!-- uses design.js -->
 		<script src="js/canvasHandler.js"></script> <!-- uses functions in designHandler.js & tools.js -->
 		<script src="js/gameRoom.js"></script>
-		<script src="js/main.js"></script> <!-- connects pages through routing -->
-		
+		<script src="js/main.js"type="module"></script> <!-- connects pages through routing -->
+	
 	</body>
 </html>

@@ -1,3 +1,15 @@
+import { TitleScreen } from './TitleScreen.js';
+
+class Game {
+    async init() {
+        const container = document.querySelector(".game-container");
+        this.titleScreen = new TitleScreen();
+        await this.titleScreen.init(container);
+		
+    }
+}
+
+
 if (!window.FileReader) {
     var message = '<p>The ' +
         '<a href="http://dev.w3.org/2006/webapi/FileAPI/" target="_blank">File API</a>s ' +
@@ -6,7 +18,9 @@ if (!window.FileReader) {
 
     document.querySelector('body').innerHTML = message;
 } else {
-    initGameRoom();
-    
-    document.head.appendChild(script);
+	const game = new Game();
+	game.init();
+
+	// initGameRoom();
+    // document.head.appendChild(script);
 }

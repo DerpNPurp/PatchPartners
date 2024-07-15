@@ -1,35 +1,133 @@
-.TitleScreen {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background: #f8f1ae
-}
-
-.TitleScreen_Logo {
-    display: block;
-    margin: 0 auto;
-    width: 128px;
-    image-rendering: pixelated;
-}
-
-.TitleScreen .KeyboardMenu {
-    position: relative;
-    width: 100px;
-    margin: 0 auto;
-    background: transparent;
-}
-
-.TitleScreen button {
-    color: #eec4dc;
-    justify-content: center;
+body, html {
+    margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
 }
 
-.TitleScreen .DescriptionBox{
-    background: transparent;
-    color:#eec4dc;
-    border: 0;
-    text-align: center;
+.game-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
 }
+
+.TitleScreen {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #F9ECD9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative; 
+}
+
+.TitleScreen .title {
+    font-size: 4em;
+    margin-bottom: 20px;
+    position: absolute;
+    top: 100px;
+    text-align: center; 
+    width: 100%;
+
+    font-family: "Rampart One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+
+    color: #00A3FF;
+    text-shadow: 1px 1px 2px black;
+
+
+}
+
+.TitleScreen .options {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    flex-grow: 1; /*This is the default already but just to make sure*/
+    justify-content: center; 
+}
+.TitleScreen .option {
+    width: 220px; 
+    font-size: 1.5em;
+    margin: 10px 0; /* Vertical margin */
+    padding: 10px 20px; /* Padding inside the button */
+    border: 2px solid #000;
+    cursor: pointer; 
+    text-align: center;
+    background-color: #A6B8E8; 
+    font-family: Arial, sans-serif;
+    opacity: 70%; 
+    border-radius: 25%;
+    display: inline-block;
+    transition: background-color 0.1s, opacity 0.1s;
+    /*Cool transition for button*/
+}
+
+.TitleScreen .option.back-button {
+    width: 100px;
+    padding: 10px;
+    font-size: 1em;
+}
+.TitleScreen .option.back-button:hover {
+    width: 110px;
+    padding: 10px;
+    background-color: #8D9BE9;
+    opacity: 100%; 
+    font-size: 1em;
+}
+.TitleScreen .option.back-button:active {
+    width: 110px;
+    padding: 10px;
+    font-size: 1em;
+    background-color: #6D7BCE; 
+}
+
+
+.TitleScreen .option:hover {
+    background-color: #8D9BE9;
+    opacity: 100%; 
+    width: 210px;
+}
+
+.TitleScreen .option:active {
+    background-color: #6D7BCE; 
+    width: 210px;
+}
+
+
+.RightSide {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F7DEE4;
+}
+
+.pinkBox {
+    background-color: #F1C8DE; 
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pinkBox img {
+    max-width: 400px;
+    max-height: 400px;
+    border-radius: 10px;
+}
+
+.rampart-one-regular {
+    font-family: "Rampart One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
