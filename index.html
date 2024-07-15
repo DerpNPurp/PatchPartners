@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>SewSynth</title> 
+		<title>PatchPartners</title> 
 		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
 		<link rel="stylesheet" type="text/css" href="css/jquery-ui.theme.css">
 		<link rel="stylesheet" type="text/css" href="css/sewsynth.css">
@@ -16,16 +16,6 @@
 		<script type="text/javascript" src="js/libs/perlin.js"></script>
 	</head>
 	<body>
-		<div class="fill-area" id="hundred">
-
-			<div class="wrapper flex_grow fill-area" id="mainDiv">
-				<div class="flex_grow fill-area" id="svg_div ">
-					<canvas class="flex_grow fill-area" id="canvas">
-						
-					</canvas>
-				</div>
-			</div>
-		</div>
 		
 		<!-- remember to register these in the guiHandler! -->
 		<!--  DEPRICATED -- Used for old view options
@@ -83,7 +73,8 @@
 		<script src="js/design.js"></script> <!-- uses designPath.js -->
 		<script src="js/designHandler.js"></script> <!-- uses design.js -->
 		<script src="js/canvasHandler.js"></script> <!-- uses functions in designHandler.js & tools.js -->
-		<script src="js/main.js"></script> <!-- initializes and connects Handlers & global variables -->
+		<script src="js/gameRoom.js"></script>
+		<script src="js/main.js"></script> <!-- connects pages through routing -->
 		
 	</body>
 </html>
