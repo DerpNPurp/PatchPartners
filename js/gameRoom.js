@@ -1,10 +1,30 @@
 function initGameRoom() {
     function addHtmlContent() {
-        var newDiv = document.createElement('div');
-        newDiv.className = 'fill-area';
-        newDiv.id = 'hundred';
+        // var html = document.createElement('html');
+        document.xmlns = "http://www.w3.org/1999/xhtml";
+        document.head.innerHTML = `
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <title>PatchPartners</title>
+        `
+        var link1 = document.createElement('link')
+        link1.rel = "stylesheet";
+        link1.type = "text/css"
+        link1.href = "css/jquery-ui.css"
 
-        newDiv.innerHTML = `
+        var link2 = document.createElement('link')
+        link2.rel = "stylesheet";
+        link2.type = "text/css"
+        link2.href = "css/jquery-ui.theme.css"
+
+        var link3 = document.createElement('link')
+        link3.rel = "stylesheet";
+        link3.type = "text/css"
+        link3.href = "css/sewsynth.css"
+
+        var div = document.createElement('div');
+        div.className = "fill-area";
+        div.id = "hundred";
+        div.innerHTML = `
             <div class="wrapper flex_grow fill-area" id="mainDiv">
                 <div class="flex_grow fill-area" id="svg_div">
                     <canvas class="flex_grow fill-area" id="canvas"></canvas>
@@ -17,7 +37,10 @@ function initGameRoom() {
             <div class="menu_div_nonExpanding" id="toolbox"></div>
         `;
 
-        document.body.appendChild(newDiv);
+        document.body.appendChild(div);
+        document.head.appendChild(link1);
+        document.head.appendChild(link2);
+        document.head.appendChild(link3);
     }
 
     function handleFileSelection(evt) {

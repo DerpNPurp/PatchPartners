@@ -7,6 +7,5 @@ if (!window.FileReader) {
     document.querySelector('body').innerHTML = message;
 } else {
     initGameRoom();
-    
     document.head.appendChild(script);
 }
