@@ -9,27 +9,3 @@ if (!window.FileReader) {
     // Import the gameRoom.js file
     document.write('<script src="gameRoom.js"></script>');
 }
-
-// $(document).ready(function() {
-//     try {
-//         // Import the rest of the functions
-//         initErrorHandler();
-//         initHistoryHandler();
-//         initCanvas(); // also initializes canvasHandler
-//         initDesignGenerator();
-//         initDesignHandler();
-//         initNoise(Math.random());
-        
-//         initilizeMenus(); // in guiHandler.js 
-//         // ^ !! NOTE !! Must be called after DesignHandler as it uses a function in the global.mainDesignHandler
-        
-//         // Move the menus over... need to also update this on resize...
-//         updateMenuPositions();
-        
-//         initKeys();
-        
-//         console.log("ready!");
-//     } catch (e){
-//         global.mainErrorHandler.displayError("catastrophic failure -- initialization failed", e);
-//     }
-// });

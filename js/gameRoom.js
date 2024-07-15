@@ -9,6 +9,11 @@ function addHtmlContent() {
                 <canvas class="flex_grow fill-area" id="canvas"></canvas>
             </div>
         </div>
+        <div class="menu_div" id="image_options">Image Options
+			<input type="file" id="uploadImg" name="files[]" class="image_options_menuGuts menu_item"/>	
+		</div>
+		<div class="menu_div_nonExpanding" id="print"></div>
+		<div class="menu_div_nonExpanding" id="toolbox"></div>
     `;
 
     document.body.appendChild(newDiv);
@@ -38,9 +43,34 @@ function handleFileSelection(evt) {
     }
 }
 
+function initApp() {
+    try {
+        // Import the rest of the functions
+        initErrorHandler();
+        initHistoryHandler();
+        initCanvas(); // also initializes canvasHandler
+        initDesignGenerator();
+        initDesignHandler();
+        initNoise(Math.random());
+        
+        initilizeMenus(); // in guiHandler.js 
+        // ^ !! NOTE !! Must be called after DesignHandler as it uses a function in the global.mainDesignHandler
+        
+        // Move the menus over... need to also update this on resize...
+        updateMenuPositions();
+        
+        initKeys();
+        
+        console.log("ready!");
+    } catch (e) {
+        global.mainErrorHandler.displayError("catastrophic failure -- initialization failed", e);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     addHtmlContent();
     document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
+    initApp();
 });
 
 var saveCalculatedDimensions = function() {
