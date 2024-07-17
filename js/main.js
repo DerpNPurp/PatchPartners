@@ -2,9 +2,16 @@ import { TitleScreen } from './TitleScreen.js';
 
 class Game {
     async init() {
-        const container = document.querySelector(".game-container");
+
+		var container = document.createElement('div');
+		container.classList.add('game-container');
+		document.body.appendChild(container);
+
+
+        // const container = document.querySelector(".game-container");
         this.titleScreen = new TitleScreen();
         await this.titleScreen.init(container);
+		
 		
     }
 }

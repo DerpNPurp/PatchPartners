@@ -1,4 +1,5 @@
 function initGameRoom() {
+    console.log("Initializing game room...");
     function addHtmlContent() {
         // var html = document.createElement('html');
         document.xmlns = "http://www.w3.org/1999/xhtml";
@@ -91,11 +92,23 @@ function initGameRoom() {
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     addHtmlContent();
+    //     document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
+    //     initApp();
+    // });
+
+    function onLoad() {
         addHtmlContent();
         document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
         initApp();
-    });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onLoad);
+    } else {
+        onLoad();
+    }
 
     var saveCalculatedDimensions = function() {
         global.calcHeight = $("#mainDiv").height();

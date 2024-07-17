@@ -1,8 +1,6 @@
 export class TitleScreen {
     constructor() {}
 
-    // Promise and resolution for the options
-    
     getInitialOptions(resolve) {
         return [
             {
@@ -16,8 +14,8 @@ export class TitleScreen {
                 label: "TUTORIAL",
                 description: "Press to view the tutorial",
                 handler: () => {
+                    resolve();
                     this.showTutorial();
-                    
                 }
             }
         ];
@@ -61,30 +59,24 @@ export class TitleScreen {
     }
 
     createElement() {
-        // Initialize the left half of the title screen
         this.element = document.createElement("div");
         this.element.classList.add("TitleScreen");
 
-        //Create the Title Text
         const title = document.createElement("div");
         title.classList.add("title");
         title.textContent = "Patch Partners";
         this.element.appendChild(title);
 
-        //Create Options container
         this.optionsContainer = document.createElement("div");
         this.optionsContainer.classList.add("options");
         this.element.appendChild(this.optionsContainer);
 
-        // Create the right side container
         this.rightSideElement = document.createElement("div");
         this.rightSideElement.classList.add("RightSide");
 
-        // Create the pastel pink box for the images
         const pinkBox = document.createElement("div");
         pinkBox.classList.add("pinkBox");
 
-        // Create the image element and append it to the pink box
         const image = document.createElement("img");
         image.src = "https://cdn.discordapp.com/attachments/1052518044464848958/1261188292779577415/image.png?ex=66920ca0&is=6690bb20&hm=9d3573d3f9cdf0b6a32ce29c06122a51f2e7136ebec1a55a0c130a30130600e9&";
         pinkBox.appendChild(image);
@@ -92,9 +84,8 @@ export class TitleScreen {
         this.rightSideElement.appendChild(pinkBox);
     }
 
-    //Set up all the buttons/options
     setOptions(options) {
-        this.optionsContainer.innerHTML = ""; // Clear existing options
+        this.optionsContainer.innerHTML = "";
 
         options.forEach(option => {
             const optionElement = document.createElement("div");
@@ -116,7 +107,6 @@ export class TitleScreen {
         this.setOptions(this.getNextOptions(resolve));
     }
 
-    //Temp function that shows you what option you chose
     showMessage(message) {
         this.clearRightSide();
         const messageElement = document.createElement("div");
@@ -124,31 +114,27 @@ export class TitleScreen {
         this.rightSideElement.appendChild(messageElement);
     }
 
-    //Temp function that shows you what option you chose
     showTutorial() {
         this.close();
-
-        const container = document.querySelector(".game-container");
-        container.remove();
-        
         initGameRoom();
-        document.head.appendChild(script);
     }
 
     clearRightSide() {
         const pinkBox = this.rightSideElement.querySelector(".pinkBox");
-        pinkBox.remove();
-        
+        if (pinkBox) {
+            pinkBox.remove();
+        }
     }
 
     close() {
+        const container = document.querySelector(".game-container");
+        container.remove();
         this.element.remove();
         this.rightSideElement.remove();
+
     }
 
     init(container) {
-        initGameRoom();
-        document.head.appendChild(script);
         return new Promise(resolve => {
             this.createElement();
             container.appendChild(this.element);
