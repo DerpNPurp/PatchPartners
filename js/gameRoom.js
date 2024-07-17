@@ -1,26 +1,26 @@
 function initGameRoom() {
     console.log("Initializing game room...");
+
     function addHtmlContent() {
-        // var html = document.createElement('html');
         document.xmlns = "http://www.w3.org/1999/xhtml";
         document.head.innerHTML = `
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
             <title>PatchPartners</title>
-        `
-        var link1 = document.createElement('link')
+        `;
+        var link1 = document.createElement('link');
         link1.rel = "stylesheet";
-        link1.type = "text/css"
-        link1.href = "css/jquery-ui.css"
+        link1.type = "text/css";
+        link1.href = "css/jquery-ui.css";
 
-        var link2 = document.createElement('link')
+        var link2 = document.createElement('link');
         link2.rel = "stylesheet";
-        link2.type = "text/css"
-        link2.href = "css/jquery-ui.theme.css"
+        link2.type = "text/css";
+        link2.href = "css/jquery-ui.theme.css";
 
-        var link3 = document.createElement('link')
+        var link3 = document.createElement('link');
         link3.rel = "stylesheet";
-        link3.type = "text/css"
-        link3.href = "css/sewsynth.css"
+        link3.type = "text/css";
+        link3.href = "css/sewsynth.css";
 
         var div = document.createElement('div');
         div.className = "fill-area";
@@ -70,10 +70,9 @@ function initGameRoom() {
 
     function initApp() {
         try {
-            // Import the rest of the functions
-            initErrorHandler();
+            initErrorHandler(); // Ensure this is called first to initialize mainErrorHandler
             initHistoryHandler();
-            initCanvas(); // also initializes canvasHandler
+            initCanvas();
             initDesignGenerator();
             initDesignHandler();
             initNoise(Math.random());
@@ -88,82 +87,69 @@ function initGameRoom() {
             
             console.log("ready!");
         } catch (e) {
-            global.mainErrorHandler.displayError("catastrophic failure -- initialization failed", e);
+            if (global.mainErrorHandler) {
+                global.mainErrorHandler.displayError("catastrophic failure -- initialization failed", e);
+            } else {
+                console.error("Initialization failed and error handler is not available:", e);
+            }
         }
     }
 
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     addHtmlContent();
-    //     document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
-    //     initApp();
-    // });
-
-    function onLoad() {
-        addHtmlContent();
-        document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
-        initApp();
-    }
-    
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onLoad);
-    } else {
-        onLoad();
-    }
-
-    var saveCalculatedDimensions = function() {
-        global.calcHeight = $("#mainDiv").height();
-        global.calcWidth = $("#mainDiv").width();
-        console.log("calculating height & width... " + global.calcHeight + ", " + global.calcWidth);
-    };
-
-    var initCanvas = function() {
-        saveCalculatedDimensions(); // Needed to initialize new canvas at an actual decent size...
-        global.mainCanvasHandler = new CanvasHandler("canvas");
-    };
-
-    var initDesignHandler = function() {
-        global.mainDesignHandler = new DesignHandler();
-    };
-
-    var initDesignGenerator = function() {
-        global.mainDesignGenerator = new DesignGenerator();
-    };
-
-    var initErrorHandler = function() {
+    function initErrorHandler() {
         global.mainErrorHandler = new ErrorHandler();
-    };
+    }
 
-    var initHistoryHandler = function() {
+    function initHistoryHandler() {
         global.mainHistoryHandler = new HistoryHandler();
-    };
+    }
 
-    var initNoise = function(seed) {
+    function initCanvas() {
+        saveCalculatedDimensions();
+        global.mainCanvasHandler = new CanvasHandler("canvas");
+    }
+
+    function initDesignHandler() {
+        global.mainDesignHandler = new DesignHandler();
+    }
+
+    function initDesignGenerator() {
+        global.mainDesignGenerator = new DesignGenerator();
+    }
+
+    function initNoise(seed) {
         noise.seed(seed);
-    };
+    }
 
-    // USED KEYS:
-    // 17, 90, 16, 88 (UNDO/REDO)
-    var initKeys = function() {
+    function initKeys() {
         global.keyMap[17] = false;
         global.keyMap[90] = false;
         global.keyMap[89] = false;
         
         global.keyEventFired.undo = false;
         global.keyEventFired.redo = false;
-    };
+    }
 
-    var updateKeyEvent = function(e) {
+    function updateKeyEvent(e) {
         e = e || event; // to deal with IE
         global.keyMap[e.keyCode] = e.type == 'keydown';
-        /* now ready to check conditionals */
-    };
+    }
+
+    function saveCalculatedDimensions() {
+        global.calcHeight = $("#mainDiv").height();
+        global.calcWidth = $("#mainDiv").width();
+        console.log("calculating height & width... " + global.calcHeight + ", " + global.calcWidth);
+    }
+
+    function displayFileImg(filename, evt) {
+        var view = new jDataView(evt.target.result, 0, evt.size);
+    }
 
     window.onkeyup = function(e) {
         updateKeyEvent(e);
-        if(global.keyMap[17] == false || global.keyMap[90] == false){
+        if (global.keyMap[17] == false || global.keyMap[90] == false) {
             global.keyEventFired.undo = false;
         }
-        if(global.keyMap[17] == false || global.keyMap[89] == false){
+        if (global.keyMap[17] == false || global.keyMap[89] == false) {
             global.keyEventFired.redo = false;
         }
     };
@@ -171,24 +157,23 @@ function initGameRoom() {
     window.onkeydown = function(e) {
         var oldKeyMap = global.keyMap;
         updateKeyEvent(e);
-            
-        if(global.mainHistoryHandler !== null){
-            if(global.keyMap[17] == true && global.keyMap[90] == true &&
-                global.keyEventFired.undo == false){
-                    global.mainHistoryHandler.doUndo();
-                    console.log("UNDOOOOOO");
-                    global.keyEventFired.undo = true;
+        if (global.mainHistoryHandler !== null) {
+            if (global.keyMap[17] == true && global.keyMap[90] == true &&
+                global.keyEventFired.undo == false) {
+                global.mainHistoryHandler.doUndo();
+                console.log("UNDOOOOOO");
+                global.keyEventFired.undo = true;
             }
-            if(global.keyMap[17] == true && global.keyMap[89] == true &&
-                global.keyEventFired.redo == false){
-                    global.mainHistoryHandler.doRedo();
-                    console.log("REdooo");
-                    global.keyEventFired.redo = true;
+            if (global.keyMap[17] == true && global.keyMap[89] == true &&
+                global.keyEventFired.redo == false) {
+                global.mainHistoryHandler.doRedo();
+                console.log("REdooo");
+                global.keyEventFired.redo = true;
             }
         }
     };
 
-    window.addEventListener("resize", function(){
+    window.addEventListener("resize", function() {
         saveCalculatedDimensions();
         
         // resize canvas to CANVAS SIZE! aka main Div size!
@@ -199,8 +184,16 @@ function initGameRoom() {
         updateMenuPositions();
     });
 
-    function displayFileImg(filename, evt) {
-        var view = new jDataView(evt.target.result, 0, evt.size);
+    function onLoad() {
+        addHtmlContent();
+        document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
+        initApp();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onLoad);
+    } else {
+        onLoad();
     }
 }
 
