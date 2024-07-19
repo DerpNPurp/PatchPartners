@@ -42,6 +42,7 @@ function initGameRoom() {
         document.head.appendChild(link1);
         document.head.appendChild(link2);
         document.head.appendChild(link3);
+        console.log("Append Children");
     }
 
     function handleFileSelection(evt) {
@@ -66,24 +67,32 @@ function initGameRoom() {
             }
             global.mainCanvasHandler.loadUserImage(file);
         }
+        console.log("handleFileSelection");
     }
 
     function initApp() {
         try {
             initErrorHandler(); // Ensure this is called first to initialize mainErrorHandler
+            console.log("1");
             initHistoryHandler();
+            console.log("2");
             initCanvas();
+            console.log("3");
             initDesignGenerator();
+            console.log("4");
             initDesignHandler();
+            console.log("5");
             initNoise(Math.random());
             
             initilizeMenus(); // in guiHandler.js 
             // ^ !! NOTE !! Must be called after DesignHandler as it uses a function in the global.mainDesignHandler
-            
+            console.log("6");
             // Move the menus over... need to also update this on resize...
             updateMenuPositions();
+            console.log("7");
             
             initKeys();
+        
             
             console.log("ready!");
         } catch (e) {
@@ -105,6 +114,7 @@ function initGameRoom() {
 
     function initCanvas() {
         saveCalculatedDimensions();
+        console.log("8");
         global.mainCanvasHandler = new CanvasHandler("canvas");
     }
 
@@ -137,6 +147,8 @@ function initGameRoom() {
     function saveCalculatedDimensions() {
         global.calcHeight = $("#mainDiv").height();
         global.calcWidth = $("#mainDiv").width();
+        // global.calcHeight = 500;
+        // global.calcWidth = 500;
         console.log("calculating height & width... " + global.calcHeight + ", " + global.calcWidth);
     }
 
