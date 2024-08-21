@@ -126,6 +126,7 @@ var CanvasHandler = function(canvasID){
 
 /// Sizing //////////////
 CanvasHandler.prototype.setCanvasDimensions = function(width, height){
+	
 
 };
 

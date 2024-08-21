@@ -1,8 +1,33 @@
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 import { TitleScreen } from './TitleScreen.js';
+
+// Get the auth and database instances
+const auth = getAuth();
+const database = getDatabase();
 
 class Game {
     async init() {
         const socket = io();
+        onAuthStateChanged(auth,(user) => {
+            console.log(user)
+            if (user){
+                //logged in
+            }
+            else{
+                //logged out
+            }
+        });
+
+        //Doesn't allow players to read/write to database unless they are signed in anonymously
+        signInAnonymously(auth)
+            .then(() => {
+                console.log("Signed in anonymously");
+            })
+            .catch((error) => {
+                console.error("Error signing in anonymously:", error);
+            });
+
 
         // Create and append the game container to the body
         var container = document.createElement('div');

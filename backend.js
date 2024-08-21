@@ -3,10 +3,13 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
-//Server pings player 2 times before disconnecting them
-const io = new Server(server, { pingInterval: 2000, pingTimeout: 5000 });
 
+const io = new Server(server, { pingInterval: 2000, pingTimeout: 5000 });
 const port = 3000;
+
+const backEndPlayers = {};
+const rooms = {};
+const playersReady = {}; // Track readiness of players by their room code
 
 app.use(express.static('public'));
 
@@ -14,24 +17,18 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-const backEndPlayers = {};
-const rooms = {};
-
-//Creates a random 6 letter room code
+// Creates a random 6 letter room code
 function generateRoomCode() {
   let roomCode = '';
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   for (let i = 0; i < 6; i++) {
-      roomCode += letters.charAt(Math.floor(Math.random() * letters.length));
+    roomCode += letters.charAt(Math.floor(Math.random() * letters.length));
   }
   return roomCode;
 }
 
 io.on('connection', (socket) => {
-  // console.log('a user connected');
-
-  // If a player disconnects, delete them from the list of players
-  // and from their respective room
+  // Handle player disconnect
   socket.on('disconnect', (reason) => {
     console.log(reason);
     const player = backEndPlayers[socket.id];
@@ -39,7 +36,6 @@ io.on('connection', (socket) => {
       const room = rooms[player.roomCode];
       if (room) {
         room.players = room.players.filter(id => id !== socket.id);
-        //If the room is empty, delete the room too
         if (room.players.length === 0) {
           delete rooms[player.roomCode];
         }
@@ -49,7 +45,7 @@ io.on('connection', (socket) => {
     io.emit('updatePlayers', backEndPlayers);
   });
 
-  //calls initGame when a room is created through "CREATE A ROOM"
+  // Handle room creation
   socket.on('initGame', (username) => {
     const roomCode = generateRoomCode();
     backEndPlayers[socket.id] = { Username: username, roomCode };
@@ -59,7 +55,7 @@ io.on('connection', (socket) => {
     console.log('Room created:', roomCode);
   });
 
-  
+  // Handle player joining a room
   socket.on('joinRoom', ({ roomCode, username }) => {
     const room = rooms[roomCode];
     if (room) {
@@ -73,9 +69,7 @@ io.on('connection', (socket) => {
 
         // Notify the creator that a player has joined
         const creatorSocketId = room.players[0];
-        // console.log('Emitting playerJoined to:', creatorSocketId);
         io.to(creatorSocketId).emit('playerJoined', username);
-        // console.log('PLAYERJOINED   WOOOOOOOOOOOO');
       } else {
         socket.emit('joinFailure', 'Room is full.');
       }
@@ -84,19 +78,27 @@ io.on('connection', (socket) => {
     }
   });
 
-  //When the creator of the room presses "START"
-  socket.on('startGame', ({ roomCode }) => {
-    const room = rooms[roomCode];
-    if (room) {
-      room.players.forEach(playerId => {
-        io.to(playerId).emit('startGame');
-      });
-    }
-  });
+  // timer code
+  // socket.on('playerReady', ({ roomCode }) => {
+  //   if (!playersReady[roomCode]) {
+  //     playersReady[roomCode] = [];
+  //   }
+  //   playersReady[roomCode].push(socket.id);
+
+  //   if (playersReady[roomCode].length === 2) {
+  //     const duration = 60000; // Example: 1-minute timer
+  //     const startTime = Date.now(); // Get current timestamp
+
+  //     io.to(playersReady[roomCode][0]).emit('startTimer', { duration, startTime });
+  //     io.to(playersReady[roomCode][1]).emit('startTimer', { duration, startTime });
+
+  //     delete playersReady[roomCode];
+  //   }
+  // });
 
   io.emit('updatePlayers', backEndPlayers);
 });
 
 server.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });

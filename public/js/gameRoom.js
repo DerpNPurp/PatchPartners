@@ -1,7 +1,58 @@
 function initGameRoom() {
+    //maxWidth and maxHeight represents the max possible size of the drawing canvas 
+    let maxWidth;
+    let maxHeight;
+
     console.log("Initializing game room...");
 
+    //list of all prompts
+    const prompts = [
+        "Draw a heart!",
+        "Draw anything!"
+    ];
+
+    
+    function getRandomPrompt() {
+        const randomIndex = Math.floor(Math.random() * prompts.length);
+        return prompts[randomIndex];
+    }
+
+    function calculateCanvasSize(width, height){
+        //Since the canvas has to be a multiple of 100px by 100px, calculate the size of the canvas
+        let minNumber = Math.min(width, height);
+        return Math.floor(minNumber / 100) * 100;
+
+    }
+    //creates a temp div to get the max size of the canvas
+    function calculateMaxDivSize() {
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.visibility = 'hidden';
+        tempDiv.style.width = '100%';
+        tempDiv.style.height = '100%';
+        tempDiv.style.left = '0';
+        tempDiv.style.top = '0';
+        
+       
+        const parentElement = document.body; 
+        parentElement.appendChild(tempDiv);
+    
+        maxWidth = tempDiv.clientWidth;
+        maxHeight = tempDiv.clientHeight;
+    
+        parentElement.removeChild(tempDiv);
+    
+        console.log(`Max width: ${maxWidth}px, Max height: ${maxHeight}px`);
+    
+    }
+
+    
+
+
     function addHtmlContent() {
+        calculateMaxDivSize();
+        const canvasSize = calculateCanvasSize(maxWidth,maxHeight);
+        
         document.xmlns = "http://www.w3.org/1999/xhtml";
         document.head.innerHTML = `
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -11,24 +62,24 @@ function initGameRoom() {
         link1.rel = "stylesheet";
         link1.type = "text/css";
         link1.href = "css/jquery-ui.css";
-
+    
         var link2 = document.createElement('link');
         link2.rel = "stylesheet";
         link2.type = "text/css";
         link2.href = "css/jquery-ui.theme.css";
-
+    
         var link3 = document.createElement('link');
         link3.rel = "stylesheet";
         link3.type = "text/css";
         link3.href = "css/sewsynth.css";
-
+    
         var div = document.createElement('div');
         div.className = "fill-area";
         div.id = "hundred";
         div.innerHTML = `
-            <div class="wrapper flex_grow fill-area" id="mainDiv">
-                <div class="flex_grow fill-area" id="svg_div">
-                    <canvas class="flex_grow fill-area" id="canvas"></canvas>
+            <div class="wrapper" id="mainDiv" style="width: ${canvasSize}px; height: ${canvasSize}px; display: inline-block;">
+                <div id="svg_div" style="width: 100%; height: 100%;">
+                    <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
                 </div>
             </div>
             <div class="menu_div" id="image_options">Image Options
@@ -37,12 +88,43 @@ function initGameRoom() {
             <div class="menu_div_nonExpanding" id="print"></div>
             <div class="menu_div_nonExpanding" id="toolbox"></div>
         `;
-
+    
         document.body.appendChild(div);
         document.head.appendChild(link1);
         document.head.appendChild(link2);
         document.head.appendChild(link3);
         console.log("Append Children");
+
+       
+    
+        //code for the prompt popup at the beginning of the game
+        const selectedPrompt = getRandomPrompt();
+        var popup = document.createElement('div');
+        popup.className = "sav-popup";
+        popup.innerHTML = `
+            <div class="sav-popup-content">
+                <img src="https://i.imgur.com/8Fo5FWh.png" alt="Sav" class="sav-image">
+                <p class="sav-prompt">Your drawing prompt is: <strong>${selectedPrompt}</strong></p>
+                <button id="startDrawingBtn" class="start-drawing-btn">Start Drawing</button>
+            </div>
+        `;
+    
+        document.body.appendChild(popup);
+        console.log("Sav Popup added");
+    
+        // button for starting the game
+        document.getElementById('startDrawingBtn').addEventListener('click', () => {
+            closePopup();
+        });
+    }
+    
+
+    function closePopup() {
+        var popup = document.querySelector('.sav-popup');
+        if (popup) {
+            popup.style.display = 'none'; // Hide the popup
+        }
+        console.log("Popup closed, game started");
     }
 
     function handleFileSelection(evt) {
@@ -85,7 +167,6 @@ function initGameRoom() {
             initNoise(Math.random());
             
             initilizeMenus(); // in guiHandler.js 
-            // ^ !! NOTE !! Must be called after DesignHandler as it uses a function in the global.mainDesignHandler
             console.log("6");
             // Move the menus over... need to also update this on resize...
             updateMenuPositions();
@@ -116,6 +197,7 @@ function initGameRoom() {
         saveCalculatedDimensions();
         console.log("8");
         global.mainCanvasHandler = new CanvasHandler("canvas");
+    
     }
 
     function initDesignHandler() {
@@ -147,8 +229,7 @@ function initGameRoom() {
     function saveCalculatedDimensions() {
         global.calcHeight = $("#mainDiv").height();
         global.calcWidth = $("#mainDiv").width();
-        // global.calcHeight = 500;
-        // global.calcWidth = 500;
+        
         console.log("calculating height & width... " + global.calcHeight + ", " + global.calcWidth);
     }
 
@@ -186,11 +267,18 @@ function initGameRoom() {
     };
 
     window.addEventListener("resize", function() {
+        calculateMaxDivSize();
+        const correctCanvasSize = calculateCanvasSize(maxWidth,maxHeight);
+        mainDiv.style.width = `${correctCanvasSize}px`;  
+        mainDiv.style.height = `${correctCanvasSize}px`;
+
+
         saveCalculatedDimensions();
         
         // resize canvas to CANVAS SIZE! aka main Div size!
         paper.view.viewSize.width = global.calcWidth;
         paper.view.viewSize.height = global.calcHeight;
+        
         
         // move menus
         updateMenuPositions();
