@@ -108,6 +108,27 @@ Design.prototype.generateSewnPath = function(params){
 	// plots sewn paths for specific input paths in params
 };
 
+// Called by designHandler 
+// Should return a list of abs points ready for plotting
+Design.prototype.getPointsForPrinting = function(){
+	try {
+		// Not sure why a design would have multiple paths
+		// Not sure how to convert multiple paths into one list of points?
+		
+		let path = this.paths[0].generateGeneratedSewnPath();
+		let points = [];
+		// Might need to convert from Path to list of points?
+		for(let i = 0; i < path.segments.length; i++){
+			points.push(path.segments[i].point.clone())
+		}
+		console.log("Printing these points: " + points)
+		return points;
+		
+	} catch (e) {
+		global.mainErrorHandler.error(e);
+	}
+};
+
 // Make sure to update/set visability after calling this function!
 Design.prototype.regenerateAllDerivitivePaths = function(params){
 	// Loops through all DesignPaths

@@ -404,25 +404,23 @@ DesignHandler.prototype.actionDesignDelete = function(params){
 
 // NOTE: Currently colors are not supported, so we send "true" to use auto-color
 DesignHandler.prototype.saveAllDesignsToFile = function(){
-	this.closeActiveDesign(); // So they are all on this.designs
+	// this.closeActiveDesign(); // So they are all on this.designs // DEPRICATED?
 	var stPattern = new Pattern();
-	
-	/*
-	// JUMP to the first stitch of this.designs if it exists
-	if(this.designs.length > 0 && this.designs[0].getFirstPoint() !== null){
-		var firstStitch = this.designs[0].getFirstPoint();
-		stPattern.addStitchAbs(firstStitch.x*this.scale, firstStitch.y*this.scale, stitchTypes.jump, true);
-		//this.fillInStitchGapsAndAddStitchAbs(stPattern, this.scale, firstStitch.x, firstStitch.y, stitchTypes.jump, true, this.threshold);
-	} else {
-		// There are no points in the first design?! WTF?!
-		// gotta add an anchor point,this will be at the upper left?
-		stPattern.addStitchAbs(0, 0, stitchTypes.jump, true);
-		console.err("FIRST DESIGN HAS NO STITCHES!!!");
-	}*/
+	var firstStitch = null;
 	
 	// For each old design, in order, stitch them out jumping between each
 	for(var i = 0; i < this.designs.length; i++){
 		var pathPoints = this.designs[i].getPointsForPrinting();
+
+		// Before adding any stitches to sew, add a command to jump to the first stitch
+		if(i == 0){
+			if (pathPoints.length == 0){
+				console.log("PROBLEM: PATH POINTS EMPTY! SAVING EMPTY PATTERN!!! ABORT!")
+				return;
+			}
+			firstStitch = pathPoints[0];
+			stPattern.addStitchAbs(firstStitch.x*this.scale, firstStitch.y*this.scale, stitchTypes.jump, true);
+		}
 		
 		// For each point in this design, stitch to there!
 		for(var j = 0; j < pathPoints.length; j++){
@@ -431,9 +429,9 @@ DesignHandler.prototype.saveAllDesignsToFile = function(){
 		}
 		// If there are more designs after this one...
 		if(i < this.designs.length-1) {
-			// JUMP from the last stitch of this design to the last stitch of the next
-			var firstStitch = this.designs[i+1].getFirstPoint();
-			this.fillInStitchGapsAndAddStitchAbs(stPattern, this.scale, firstStitch.x, firstStitch.y, stitchTypes.jump, true, this.threshold);//, stitchTypes.normal);
+			// JUMP from the last stitch of this design to the first stitch of the next
+			//var firstStitch = this.designs[i+1].getFirstPoint();
+			//this.fillInStitchGapsAndAddStitchAbs(stPattern, this.scale, firstStitch.x, firstStitch.y, stitchTypes.jump, true, this.threshold);//, stitchTypes.normal);
 		}
 	}
 	
@@ -464,7 +462,7 @@ DesignHandler.prototype.fillInStitchGapsAndAddStitchAbs = function(stPattern, sc
 	var tempX = x;//*scale;
 	var tempY = y;//*scale;
 	
-	//console.log("____ calling fillInStitchGraphAndAddStitchAbs: " + scale + ", " + x + ", " + y + ", " + flags + ", " + color);
+	console.log("____ calling fillInStitchGraphAndAddStitchAbs: " + scale + ", " + x + ", " + y + ", " + flags + ", " + color);
 
 	var lastStitch = stPattern.stitches[stPattern.stitches.length-1];
 	var newX = 0;
@@ -475,7 +473,7 @@ DesignHandler.prototype.fillInStitchGapsAndAddStitchAbs = function(stPattern, sc
 	var yDiff = (y - lastStitch.y)*scale;
 	var count = 0; // Just in case!
 	
-	//console.log("__Diffs: " + xDiff + ", " + yDiff);
+	console.log("__Diffs: " + xDiff + ", " + yDiff);
 	
 	while((xDiff > threshold || xDiff < -threshold || yDiff > threshold || yDiff < -threshold) && count < 1000){
 		

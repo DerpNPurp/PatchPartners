@@ -814,6 +814,22 @@ DesignPath.prototype.generatePaperPathSewnPath = function(){
 	return this.paperPath.sewnPath;
 };
 
+// Returns a list of points for this.derivitivePaths.generatedPath
+// Held in this.derivitivePaths.generatedPath.sewnPath
+DesignPath.prototype.generateGeneratedSewnPath = function(){
+	if(this.derivitivePaths.generatedPath == undefined || this.derivitivePaths.generatedPath == null){
+		throw new Error("Cannot generateGeneratedSewnPath off of an invalid path", this.derivitivePaths.generatedPath);
+		return;
+	}
+	// If this.paperPath should have a sewn path, 
+	if(this.derivitivePaths.generatedPath.sewnPath !== undefined && this.derivitivePaths.generatedPath.sewnPath !== null){
+		this.derivitivePaths.generatedPath.sewnPath.remove();
+		this.derivitivePaths.generatedPath.sewnPath = null;
+	}
+	this.derivitivePaths.generatedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.generatedPath));
+	return this.derivitivePaths.generatedPath.sewnPath;
+};
+
 // Pre: this.paperPath is not null, otherwise return 
 // Post: this.derivitivePaths.simplifiedPath is set if this.paperPath is not null
 //       this.derivitivePaths.simplifiedPath.sewn is recalculated if it was not null
