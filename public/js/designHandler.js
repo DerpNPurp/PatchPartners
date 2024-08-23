@@ -14,7 +14,7 @@ var DesignHandler = function(){
 	// DRASTIC DESIGN CHANGE:
 	// "activeDesign" will now be an index for this.designs, not a seperate design
 	this.activeDesign = null;
-	this.scale = 2;
+	this.scale = 1;
 	
 	//this.lastSelectedLineType = "path";
 	this.lastSelectedLineType = "";
@@ -437,18 +437,28 @@ DesignHandler.prototype.saveAllDesignsToFile = function(){
 	
 	// Now close down the pattern, adjust for printing, and send to file!
 	stPattern.addStitchRel(0, 0, stitchTypes.end, true);
-	console.log("pattern stitches!: " + stPattern.stringifyStitches());
+	//console.log("pattern stitches!: " + stPattern.stringifyStitches());
 	
 	// Scale up // NOTE: Simple scaling does not work. Can too easily make a jump too long (>121)
 	// This is why, when we place stitches, we use the scale to test how long the scale WILL extend stitches
+	// UNTESTED TODO: TEST/FIX
 	stPattern.scale(this.scale);
+
+	//Translate all points from origin at upper left to origin at the center of the design
+	let canvasDimensions = global.mainCanvasHandler.getCanvasDimensions();
+	stPattern.translate(-canvasDimensions.x/2, -canvasDimensions.y/2);
+	//console.log("pattern translated to 0,0: " + stPattern.stringifyStitches());
 	
 	// Flip them vertically, because the sewing will be read upside-down
+	// This keeps producing negative numbers, which is invalid. Need to move design to middle origin first
 	stPattern.invertPatternVertical();
-	console.log("pattern post-invert!: " + stPattern.stringifyStitches());
+	//console.log("pattern post-invert!: " + stPattern.stringifyStitches());
+
+	stPattern.translate(canvasDimensions.x/2, canvasDimensions.y/2);
+	//console.log("pattern translated back: " + stPattern.stringifyStitches());
 	
 	// Turn abs stitches into relative ones, as all DST stitches are relative movements
-	stPattern.transformToRelStitches();
+	stPattern.transformToRelStitches(canvasDimensions);
 	
 	// And print!
 	var rando = Math.floor(Math.random() * 1000);
@@ -462,7 +472,7 @@ DesignHandler.prototype.fillInStitchGapsAndAddStitchAbs = function(stPattern, sc
 	var tempX = x;//*scale;
 	var tempY = y;//*scale;
 	
-	console.log("____ calling fillInStitchGraphAndAddStitchAbs: " + scale + ", " + x + ", " + y + ", " + flags + ", " + color);
+	//console.log("____ calling fillInStitchGraphAndAddStitchAbs: " + scale + ", " + x + ", " + y + ", " + flags + ", " + color);
 
 	var lastStitch = stPattern.stitches[stPattern.stitches.length-1];
 	var newX = 0;
@@ -473,7 +483,7 @@ DesignHandler.prototype.fillInStitchGapsAndAddStitchAbs = function(stPattern, sc
 	var yDiff = (y - lastStitch.y)*scale;
 	var count = 0; // Just in case!
 	
-	console.log("__Diffs: " + xDiff + ", " + yDiff);
+	//console.log("__Diffs: " + xDiff + ", " + yDiff);
 	
 	while((xDiff > threshold || xDiff < -threshold || yDiff > threshold || yDiff < -threshold) && count < 1000){
 		
@@ -498,7 +508,7 @@ DesignHandler.prototype.fillInStitchGapsAndAddStitchAbs = function(stPattern, sc
 		
 		count++;
 	}
-	if(count > 0) console.log("last stitch is " + xDiff + ", " + yDiff + " away from the last stitch");
+	//if(count > 0) console.log("last stitch is " + xDiff + ", " + yDiff + " away from the last stitch");
 
 	stPattern.addStitchAbs(tempX, tempY, flags, color);
 };

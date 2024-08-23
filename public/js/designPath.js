@@ -6,6 +6,7 @@
  * 
  * DesignPath is primarily a container to be edited by Design.
  * However, DesignPath does handle translating its paperPath to a sewing path
+ * -- Does it really though? Not successfully
  * 
  * HOW TO ACCESS/SELECT A PATH VIA "params"
  * params={
@@ -286,6 +287,8 @@ DesignPath.prototype.getPaperPath = function(params){
 // Pre: this.stithLengthPixels is set by this.setSewnStitchLength
 // Return: A NEW PAPER.JS PATH made off the x,y coordinates calculated
 // NOTE: Because this path could be any of the paths here, we do not know what drawing settings it should have
+// THIS FUNCTION IS JUST WRONG/UNTESTED
+// TODO: FIX THIS or hand to math off once we know hoop size
 DesignPath.prototype.calcSewnPath = function(path){
 	if(path == null){
 		throw new Error("Cannot getSewnPath for a null path, even paperPath", path);
@@ -810,7 +813,9 @@ DesignPath.prototype.generatePaperPathSewnPath = function(){
 		this.paperPath.sewnPath.remove();
 		this.paperPath.sewnPath = null;
 	}
-	this.paperPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.paperPath));
+	// This just produces garbage, skip for now (TODO FIX THIS)
+	//this.paperPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.paperPath));
+	this.paperPath.sewnPath = this.roundPathPoints(this.paperPath);
 	return this.paperPath.sewnPath;
 };
 
@@ -826,7 +831,9 @@ DesignPath.prototype.generateGeneratedSewnPath = function(){
 		this.derivitivePaths.generatedPath.sewnPath.remove();
 		this.derivitivePaths.generatedPath.sewnPath = null;
 	}
-	this.derivitivePaths.generatedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.generatedPath));
+	// This just produces garbage, skip for now (TODO FIX THIS)
+	//this.derivitivePaths.generatedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.generatedPath));
+	this.derivitivePaths.generatedPath.sewnPath = this.derivitivePaths.generatedPath;
 	return this.derivitivePaths.generatedPath.sewnPath;
 };
 
@@ -871,7 +878,8 @@ DesignPath.prototype.generateSimplifiedPath = function(params){
 	
 	// regenerate sewn path too
 	// this.roundPathPoints returns a new Path
-	this.derivitivePaths.simplifiedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.simplifiedPath));
+	// BROKEN, needs fixing
+	//this.derivitivePaths.simplifiedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.simplifiedPath));
 	
 	
 	// FLAG IS NOW CLEAN
@@ -930,7 +938,8 @@ DesignPath.prototype.generateFlattenedPath = function(params){
 		this.derivitivePaths.flattenedPath.flatten(params.flatness);
 	}
 	// regenerate sewn path
-	this.derivitivePaths.flattenedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.flattenedPath));
+	// BROKEN Needs fixing
+	//this.derivitivePaths.flattenedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.flattenedPath));
 	
 	
 	// FLAG IS NOW CLEAN

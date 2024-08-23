@@ -130,6 +130,13 @@ CanvasHandler.prototype.setCanvasDimensions = function(width, height){
 
 };
 
+// Gets size of canvas in pixel units {x: , y: }
+// Used by designHandler to move the design to be centered on 0,0 prior to flipping and sewing
+// 		Note: This doesn't actually move anything on the canvas, just to calculate points
+CanvasHandler.prototype.getCanvasDimensions = function(){
+	return {x: this.canvas.width, y: this.canvas.height}
+};
+
 /// !! Clear all contents !! //////////////
 CanvasHandler.prototype.clear = function(width, height){
 

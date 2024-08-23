@@ -116,12 +116,13 @@ Design.prototype.getPointsForPrinting = function(){
 		// Not sure how to convert multiple paths into one list of points?
 		
 		let path = this.paths[0].generateGeneratedSewnPath();
+		console.log("Design.getPointsForPrinting: Processing this path: " + path)
 		let points = [];
 		// Might need to convert from Path to list of points?
 		for(let i = 0; i < path.segments.length; i++){
 			points.push(path.segments[i].point.clone())
 		}
-		console.log("Printing these points: " + points)
+		console.log("Design.getPointsForPrinting: Printing these points: " + points)
 		return points;
 		
 	} catch (e) {

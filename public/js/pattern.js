@@ -26,7 +26,10 @@
 		this.colors = [];
 		this.stitches = [];
 		this.oldAbsStitches = [];
-        this.hoop = {};
+        this.hoop = {
+			width: 100,
+			height: 100
+		};
 		this.lastX = 0;
 		this.lastY = 0;
 		this.top = 0;
@@ -88,36 +91,70 @@
 		this.stitches[this.stitches.length] = new Stitch(0, 0, stitchTypes.trim, this.currentColorIndex);
 		this.stitches[this.stitches.length] = new Stitch(x, y, stitchTypes.trim, this.currentColorIndex);
 	};
+
+	// Need to calculate the jump from 0,0 (center) to the first stitch
+	// The first stitch is scaled to the canvas, so first we need to scale it to the size of the hoop
+	// 		TODO: DO THIS EARLIER
+	// Then we need to calculate the position from the upper left origin to the center origin
+	// BEWARE: If players canvases are two seperate objects, this will need to be adjusted to share 1 hoop
+	Pattern.prototype.calculateFirstStitch = function(canvasDimensions, stitch){
+		if(canvasDimensions == undefined){
+			console.log("Pattern.calculateFirstStitch cannot scale without canvas dimensions, aborting")
+			return null;
+		}
+		// NOTE: X/Y scale factors should be the SAME. If they are not, this may need to be changed
+		// Going off of Height for now
+		let scaleFactor = this.hoop.height / canvasDimensions.y;
+		if(stitch == undefined){
+			console.log("Pattern.calculateFirstStitch cannot function with undefined stitch");
+			return null;
+		}
+		//console.log("Pattern.calculateFirstStitch NAN? ", this.hoop.height, canvas))
+		return new Stitch(Math.round(stitch.x * scaleFactor), Math.round(stitch.y * scaleFactor), stitch.flags, stitch.color);
+	};
 	
-	Pattern.prototype.transformToRelStitches = function(){
-		//console.log("transformToRelStitches OldStitches " + this.stringifyStitches());
+	Pattern.prototype.transformToRelStitches = function(canvasDimensions){
+		console.log("transformToRelStitches OldStitches " + this.stringifyStitches());
 		this.oldAbsStitches = [];
+		// Is this purely precautionary?
 		for(var i = 0; i < this.stitches.length; i++){
 			var st = this.stitches[i];
 			this.oldAbsStitches.push(new Stitch(st.x, st.y, st.flags, st.color));
 		}
 		
 		if(this.stitches.length > 1){ // Safety first
-			for(var i = this.stitches.length-1; i >= 1; i--){ // I hope this doesn't mess up the first stitch =X
+			for(var i = this.stitches.length-1; i >= 1; i--){ // I hope this doesn't mess up the first stitch =X -- haha it does
 				// compare this stitch's location to the previous'
 				var currentStitch = this.stitches[i];
 				var lastStitched = this.stitches[i-1];
 				currentStitch.x = currentStitch.x - lastStitched.x;
 				currentStitch.y = currentStitch.y - lastStitched.y;
 			}
+
+			// The first stitch (a jump to the first actual stitch) needs to be relative to a center 0,0 coordinate
+			// So it needs to be overridden 
+			// BEWARE: If we are ever reverting stitch back to non-relative, we need to scale and change their origin back
+			let newFirstStitch = this.calculateFirstStitch(canvasDimensions, this.stitches[0]);
+			if(newFirstStitch !== null){
+				this.stitches[0] = newFirstStitch;
+			}
+			
+		} else {
+			console.log("Pattern.transformToRelStitches FAILED with an empty list of this.stitches")
 		}
-		//console.log("transformToRelStitches New!!!!! " + this.stringifyStitches());
+		console.log("transformToRelStitches New!!!!! " + this.stringifyStitches());
 	};
 
 	Pattern.prototype.calculateBoundingBox = function () {
 		var i = 0,
 			stitchCount = this.stitches.length,
 			pt;
-		if (stitchCount === 0) {
-			this.bottom = 1;
-			this.right = 1;
-			return;
-		}
+		// Why this? It just gives an inaccurate size
+		//if (stitchCount === 0) {
+		//	this.bottom = 1;
+		//	this.right = 1;
+		//	return;
+		//}
 		this.left = 99999;
 		this.top = 99999;
 		this.right = -99999;
@@ -143,9 +180,6 @@
 		console.log("moveToZeroFromPositive OldStitches " + this.stringifyStitches());
 		
 		
-		this.left = this.oldLeft;
-		this.top = this.oldTop;
-		
 		var i = 0,
 			stitchCount = this.stitches.length;
 		for (i = 0; i < stitchCount; i += 1) {
@@ -153,8 +187,7 @@
 			this.stitches[i].y += this.top;
 		}
 		
-		this.right += this.left;
-		this.bottom += this.top;
+		this.calculateBoundingBox();
 		
 		console.log("moveToZeroFromPositive New!!!!! " + this.stringifyStitches());
 	};
@@ -170,22 +203,24 @@
 		this.oldLeft = this.left;
 		this.oldTop = this.top;
 		
-		this.right -= this.left;
-		this.left = 0;
-		this.bottom -= this.top;
-		this.top = 0;
+		//this.right -= this.left;
+		//this.left = 0;
+		//this.bottom -= this.top;
+		//this.top = 0;
+		this.calculateBoundingBox();
 	};
 	
-	// BEWARE USING THIS this.left/right will be wrong probably
+	// BEWARE USING THIS this.left/right will be wrong probably because flip/coordinate space
 	Pattern.prototype.translate = function(x, y){
 		for (var i = 0; i < this.stitches.length; i += 1) {
 			this.stitches[i].x += x;
 			this.stitches[i].y += y;
 		}
-		this.right += x;
-		this.left += x;
-		this.top += y;
-		this.bottom += y;
+		//this.right += x;
+		//this.left += x;
+		//this.top += y;
+		//this.bottom += y;
+		this.calculateBoundingBox();
 	};
 	
 	// BEWARE USING THIS distance between stitches gets big
@@ -204,13 +239,14 @@
 
 	Pattern.prototype.invertPatternVertical = function () {
 		var i = 0,
-			temp = -this.top,
 			stitchCount = this.stitches.length;
 		for (i = 0; i < stitchCount; i += 1) {
+			// This reflects along the x axis, which is (for sewsynth) at the top of the screen
 			this.stitches[i].y = -this.stitches[i].y;
+			// So we need to move the stitches back into place by moving them down
+			// ALTERNATIVELY: Center the design on (0,0) before inverting <-- going to do this one
 		}
-		this.top = -this.bottom;
-		this.bottom = temp;
+		this.calculateBoundingBox();
 	};
 
 	Pattern.prototype.addColorRandom = function () {
