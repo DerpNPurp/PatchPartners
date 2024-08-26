@@ -1,0 +1,53 @@
+/* Reset all margins and paddings for the body */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Ensure the end screen takes up the entire viewport */
+#endScreen {
+    background-color: #F9ECD9; /* Yellow background */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000; /* Make sure it appears on top of all other content */
+}
+
+/* Styling for the game title */
+#endScreen #gameTitle {
+    font-size: 4em;
+    font-family: "Rampart One", sans-serif;
+    font-weight: 400;
+    color: #00A3FF;
+    text-shadow: 1px 1px 2px black;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Styling for the drawing container */
+#endScreen #finishedDrawing {
+    width: 500px;
+    height: 500px;
+    background-color: #ffffff; /* White background for the drawing */
+    border: 2px dashed black;
+    margin-bottom: 20px;
+}
+
+/* Styling for the main menu button */
+#endScreen #mainMenuBtn {
+    padding: 10px 20px;
+    font-size: 1.5em;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background-color: #00A3FF;
+    color: #ffffff;
+}
