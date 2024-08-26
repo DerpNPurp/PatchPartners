@@ -153,7 +153,7 @@ export class TitleScreen {
     showTutorial() {
         //TODO: replace below with tutorial
         this.close();
-        initGameRoom();
+        initGameRoom(this.socket,111111);
     }
 
     
@@ -375,7 +375,7 @@ export class TitleScreen {
         // Listen for the event to start the game on both clients
         this.socket.on('startGame', () => {
             this.close();
-            initGameRoom();
+            initGameRoom(this.socket,roomCode);
         });
     }
 
@@ -444,7 +444,7 @@ export class TitleScreen {
         // Listen for the event to start the game on both clients
         this.socket.on('startGame', () => {
             this.close();
-            initGameRoom();
+            initGameRoom(this.socket,roomCode);
         });
     }
 

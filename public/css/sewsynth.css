@@ -1,161 +1,197 @@
-
-*, *:before, *:after
-{
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
+/* Reset default box-sizing for all elements */
+*, *:before, *:after {
+    box-sizing: border-box;
 }
 
-body {
+/* Ensure the body and html are set to 100% width and height */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box; /* Include padding and borders in width/height */
+    font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", 
+                 "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", 
+                 "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", 
+                 Helvetica, Arial, sans-serif; /* Font stack */
+    font-size: 14px;
     background-image: url("../media/pinkGalaxy.png");
     background-repeat: repeat;
-    
-    font-size: 14px;
-    /* Helvetica/Arial-based sans serif stack */
-    font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
-    
 }
 
-#hundred {
-	
-	width: 100%;
-    height: 100%;
+/* Title Row Styling */
+#titleRow {
+    width: 100%; /* Ensure full width */
+    text-align: center;
+    position: relative; /* Occupy its own space */
+    z-index: 1001; /* Ensure it's on top of other elements */
+    background-color: none;
+}
 
+
+#gameTitle {
+    font-size: 4em;
+    margin: 0; /* Reset margin */
+    font-family: "Rampart One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #00A3FF;
+    text-shadow: 1px 1px 2px black;
+    text-align: left;
+}
+
+/* Ensure fill-area container takes full width and height */
+.fill-area {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch; /* Align items in Cross Axis */
+    align-content: stretch; /* Extra space in Cross Axis */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+}
+
+/* Styling for the game container */
+#hundred {
+    width: 100%;
+    height: 100%;
+    border-style: none;
+    border-width: 0;
+    border-color: transparent;
+    display: flex;
 }
 
 .wrapper {
-	background: #e1dfff;
-	border-radius: 25px;
-	padding: 25px;
-	margin: 35px;
-	margin-left: 70px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.6);
-	
-}
-
-.flex_grow{
-	flex: 1; /* same as flex: 1 1 auto; */
-}
-
-.fill-area
-{
+    background: #e1dfff;
+    border-radius: 25px;
+    padding: 25px;
+    margin: 35px;
+    margin-left: 100px;
+    margin-top: 0;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.6);
     display: flex;
-    flex-direction: row;
-    
-    justify-content: flex-start; /* align items in Main Axis */
-    align-items: stretch; /* align items in Cross Axis */
-    align-content: stretch; /* Extra space in Cross Axis */
-    
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    box-sizing: border-box; /* Ensure padding is included in width/height */
 }
 
-html, body, #hundred {
-  height: 100%;
-  width: 100%;
-  
-  margin: 0;
-  padding: 0;
-  display: flex;
+/* Ensure the canvas fills the wrapper's available space */
+#canvas {
+    width: 100%;
+    height: 100%;
+    border-style: dashed;
+    border-width: 1px;
+    border-color: red;
+    background: #ffffff;
+    flex: 1;
+    box-sizing: border-box;
 }
 
-#canvas{
-	border-style:dashed;
-	border-width:1px;
-	border-color:red;
-	background: #ffffff;
-	flex: 1 1 auto;
+/* Timer Styling */
+#timer {
+    padding-top: 50px;
+    background-color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 1000;
+    color: black;
+    border: none;
+    text-align: center;
+    display: inline-block;
+    height: 25px; /* Restrict the height of the background */
+    box-sizing: content-box; /* Ensure padding does not affect the max height */
+	position: absolute;
+	margin-left: 20px;
 }
 
-div {
-	border-style:solid;
-	border-width:1px;
-	border-color:black;	
-}
-
+/* Menu Div Styling */
 .menu_div {
-	background: #efdfff;
-	border-radius: 5px;
-	padding: 5px;
-	margin: 5px;
-	height: 30px;
-	width: 200px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 6px 10px 0 rgba(0, 0, 0, 0.6);
-	position:absolute;
-	overflow:hidden;
-	
-	-webkit-transition: width .5s, height .5s; /* Safari */
-    transition: width .5s, height .5s;
+    background: #efdfff;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+    height: 30px;
+    width: 200px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 6px 10px 0 rgba(0, 0, 0, 0.6);
+    position: absolute;
+    overflow: hidden;
+    transition: width .5s, height .5s; /* Smooth transition for resizing */
     transition-timing-function: ease-in-out;
 }
 
-.menu_div_nonExpanding{
-	background: #efdfff;
-	border-radius: 5px;
-	padding: 5px;
-	margin: 5px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 6px 10px 0 rgba(0, 0, 0, 0.6);
-	position:absolute;
+.menu_div_nonExpanding {
+    background: #efdfff;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 6px 10px 0 rgba(0, 0, 0, 0.6);
+    position: absolute;
 }
 
-.menu_div:hover{
-	width:200px;
-	height:250px;
+.menu_div:hover {
+    width: 200px;
+    height: 250px;
 }
 
 .menu_item {
-	visibility: hidden;
+    visibility: hidden;
 }
 
-.imageButtonClass
-{
-    background-repeat: no-repeat; 
+/* Image Button Styling */
+.imageButtonClass {
+    background-repeat: no-repeat;
     width: 40px;
     height: 40px;
     background-size: 40px 40px;
-    border: none;    
-    
-    /* From jqueryCSS */
+    border: none;
     padding: .4em 1em;
-	display: inline-block;
-	position: relative;
-	line-height: normal;
-	margin-right: .1em;
-	cursor: pointer;
-	vertical-align: middle;
-	text-align: center;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-
-	/* Support: IE <= 11 */
-	overflow: visible;
-    
+    display: inline-block;
+    position: relative;
+    line-height: normal;
+    margin-right: .1em;
+    cursor: pointer;
+    vertical-align: middle;
+    text-align: center;
+    user-select: none;
+    overflow: visible; /* Support: IE <= 11 */
 }
 
 .imageButtonClass:hover,
 .imageButtonClass:focus,
 .active {
-	border: 1px solid #cccccc;
-	font-weight: normal;
-	color: #2b2b2b;
+    border: 1px solid #cccccc;
+    font-weight: normal;
+    color: #2b2b2b;
 }
 
-.tooldefault, .tooldefault:active, .tooldefault:focus, .tooldefault:hover
-{
-	background-image: url(../media/toolIcon.png);   
-}
-.toolplainLine, #tool_button_plainLine
-{
-	background-image: url(../media/toolIcon.png);   
+.tooldefault, .tooldefault:active, .tooldefault:focus, .tooldefault:hover {
+    background-image: url(../media/toolIcon.png);
 }
 
-.toolsketchNoise, #tool_button_sketchNoise
-{
-	background-image: url(../media/toolIcon.png);   
+.toolplainLine, #tool_button_plainLine {
+    background-image: url(../media/toolIcon.png);
+}
+
+.toolsketchNoise, #tool_button_sketchNoise {
+    background-image: url(../media/toolIcon.png);
 }
 
 
-/* Prompt popup */
+#savOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black background */
+    z-index: 2000; /* Place behind the popup */
+}
+
+/* Popup Styling */
 .sav-popup {
     position: fixed;
     top: 50%;
@@ -164,7 +200,7 @@ div {
     background-color: rgba(0, 0, 0, 0.8);
     padding: 20px;
     border-radius: 10px;
-    z-index: 1000;
+    z-index: 2001;
     text-align: center;
     color: #fff;
 }
@@ -198,4 +234,5 @@ div {
 .start-drawing-btn:hover {
     background-color: #ff9900;
 }
+
 
