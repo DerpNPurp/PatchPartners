@@ -413,25 +413,17 @@ DesignHandler.prototype.saveAllDesignsToFile = function(){
 		var pathPoints = this.designs[i].getPointsForPrinting();
 
 		// Before adding any stitches to sew, add a command to jump to the first stitch
-		if(i == 0){
-			if (pathPoints.length == 0){
-				console.log("PROBLEM: PATH POINTS EMPTY! SAVING EMPTY PATTERN!!! ABORT!")
-				return;
-			}
-			firstStitch = pathPoints[0];
-			stPattern.addStitchAbs(firstStitch.x*this.scale, firstStitch.y*this.scale, stitchTypes.jump, true);
+		if (pathPoints.length == 0){
+			console.log("PROBLEM: PATH POINTS EMPTY in design id" + i + " Continue")
+			continue;
 		}
+		firstStitch = pathPoints[0];
+		stPattern.addStitchAbs(firstStitch.x*this.scale, firstStitch.y*this.scale, stitchTypes.jump, true);
 		
 		// For each point in this design, stitch to there!
 		for(var j = 0; j < pathPoints.length; j++){
 			var point = pathPoints[j];
 			this.fillInStitchGapsAndAddStitchAbs(stPattern, this.scale, point.x, point.y, stitchTypes.normal, true, this.threshold);//, stitchTypes.normal);
-		}
-		// If there are more designs after this one...
-		if(i < this.designs.length-1) {
-			// JUMP from the last stitch of this design to the first stitch of the next
-			//var firstStitch = this.designs[i+1].getFirstPoint();
-			//this.fillInStitchGapsAndAddStitchAbs(stPattern, this.scale, firstStitch.x, firstStitch.y, stitchTypes.jump, true, this.threshold);//, stitchTypes.normal);
 		}
 	}
 	
