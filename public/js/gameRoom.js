@@ -1,22 +1,13 @@
-function initGameRoom(socket,roomCode) {
+function initGameRoom(socket,roomCode, prompt, player1) {
     //maxWidth and maxHeight represents the max possible size of the drawing canvas 
     let maxWidth;
     let maxHeight;
     let updateTimer;
 
     console.log("Initializing game room...");
+    console.log("Prompt received:", prompt);
 
-    //list of all prompts
-    const prompts = [
-        "Draw a heart!",
-        "Draw anything!"
-    ];
-
-    
-    function getRandomPrompt() {
-        const randomIndex = Math.floor(Math.random() * prompts.length);
-        return prompts[randomIndex];
-    }
+  
 
     function calculateCanvasSize(width, height){
         //Since the canvas has to be a multiple of 100px by 100px, calculate the size of the canvas
@@ -50,11 +41,10 @@ function initGameRoom(socket,roomCode) {
 
     
 
-
     function addHtmlContent() {
-        //calculates the size of the canvas for the initialization of the canvas
-        calculateMaxDivSize();
-        const canvasSize = calculateCanvasSize(maxWidth, maxHeight);
+        // calculates the max size of the canvas 
+        // calculateMaxDivSize();
+        // const canvasSize = calculateCanvasSize(maxWidth, maxHeight);
         
         document.xmlns = "http://www.w3.org/1999/xhtml";
         document.head.innerHTML = `
@@ -65,63 +55,79 @@ function initGameRoom(socket,roomCode) {
         link1.rel = "stylesheet";
         link1.type = "text/css";
         link1.href = "css/jquery-ui.css";
-
+    
         var link2 = document.createElement('link');
         link2.rel = "stylesheet";
         link2.type = "text/css";
         link2.href = "css/jquery-ui.theme.css";
-
+    
         var link3 = document.createElement('link');
         link3.rel = "stylesheet";
         link3.type = "text/css";
         link3.href = "css/sewsynth.css";
-
-        //added the css stylesheet for the endscreen
+    
+        //Attached the css for the end screen
         var link4 = document.createElement('link');
         link4.rel = "stylesheet";
         link4.type = "text/css";
         link4.href = "css/endScreen.css"; 
-
-        //creates the div that contains the canvas
+    
+        // Create the main divs
         var mainDiv = document.createElement('div');
         var parentDiv = document.createElement('div');
         parentDiv.className = "fill-area";
         parentDiv.id = "hundred";
         parentDiv.style.position = 'relative';
-
+    
         // Title row div at the top
         var titleRowDiv = document.createElement('div');
         titleRowDiv.id = "titleRow";
-
+    
         // Title inside the title row
         var titleDiv = document.createElement('div');
         titleDiv.id = "gameTitle";
         titleDiv.textContent = "PatchPartners";
-
-        titleRowDiv.appendChild(titleDiv); 
-        mainDiv.appendChild(titleRowDiv); 
-
+    
+        titleRowDiv.appendChild(titleDiv);
+        mainDiv.appendChild(titleRowDiv);
+    
         // Timer div
         var timerDiv = document.createElement('div');
         timerDiv.id = "timer";
-
+    
         // Wrapper div that contains the canvas
         var wrapperDiv = document.createElement('div');
         wrapperDiv.className = "wrapper";
         wrapperDiv.id = "mainDiv";
-        wrapperDiv.style.width = `${canvasSize}px`;
-        wrapperDiv.style.height = `${canvasSize}px`;
-
-        wrapperDiv.innerHTML = `
-            <div id="svg_div" style="width: 100%; height: 100%;">
-                <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
-            </div>
-        `;
-
+        wrapperDiv.style.display = "flex"; // Ensure it behaves as a flex container
+    
+        // Create the canvas div
+        var canvasDiv = document.createElement('canvas');
+        canvasDiv.id = "canvas";
+        
+    
+        // Create the adjacent div/ fake canvas that will eventually hold other player's drawing
+        var adjacentDiv = document.createElement('div');
+        adjacentDiv.id = 'adjacentDiv';
+        
+    
+        //Depending on player number, they are assigned the left or right half of the canvas
+        //Player1 = left
+        //Player2 = right
+        if(player1){
+            wrapperDiv.appendChild(canvasDiv);
+            wrapperDiv.appendChild(adjacentDiv);
+        
+        }else{
+            wrapperDiv.appendChild(adjacentDiv);
+            wrapperDiv.appendChild(canvasDiv);
+        }
+    
+        // Append the wrapper and timer to the parent div
         parentDiv.appendChild(wrapperDiv);
         parentDiv.appendChild(timerDiv);
-
-        //brushes, save to dst, and image options
+    
+        
         var additionalDiv = document.createElement('div');
         additionalDiv.innerHTML = `
             <div class="menu_div" id="image_options">Image Options
@@ -131,36 +137,34 @@ function initGameRoom(socket,roomCode) {
             <div class="menu_div_nonExpanding" id="toolbox"></div>
         `;
         additionalDiv.id = 'imageOptions';
-
+    
         parentDiv.appendChild(additionalDiv);
         mainDiv.appendChild(parentDiv);
-
+    
         document.body.appendChild(mainDiv);
         document.head.appendChild(link1);
         document.head.appendChild(link2);
         document.head.appendChild(link3);
         document.head.appendChild(link4);
         console.log("Append Children");
-
-        //the transparent overlay to cover the game when the prompt is given to player
+    
+        // Transparent overlay behind the prompt
         const overlay = document.createElement('div');
         overlay.id = 'savOverlay';
-
         document.body.appendChild(overlay);
-        
-        //code for the prompt popup at the beginning of the game
-        const selectedPrompt = getRandomPrompt();
+    
+        // The prompt popup before the game starts
+        // const selectedPrompt = getRandomPrompt();
         var popup = document.createElement('div');
         popup.className = "sav-popup";
         popup.innerHTML = `
             <div class="sav-popup-content">
                 <img src="https://i.imgur.com/8Fo5FWh.png" alt="Sav" class="sav-image">
-                <p class="sav-prompt">Your drawing prompt is: <strong>${selectedPrompt}</strong></p>
+                <p class="sav-prompt">Your drawing prompt is: <strong>${prompt}</strong></p>
                 <button id="startDrawingBtn" class="start-drawing-btn">Start Drawing</button>
                 <p id="waitingMessage" style="display: none;">Waiting for other player...</p>
             </div>
         `;
-    
         document.body.appendChild(popup);
         console.log("Sav Popup added");
     
@@ -170,7 +174,6 @@ function initGameRoom(socket,roomCode) {
             document.getElementById('waitingMessage').style.display = 'block';
         });
     
-
         socket.on('startDrawing', () => {
             closePopup();
         });
@@ -370,9 +373,9 @@ function initGameRoom(socket,roomCode) {
         global.keyMap[e.keyCode] = e.type == 'keydown';
     }
 
-    function saveCalculatedDimensions(dimension) {
-        global.calcHeight = dimension;
-        global.calcWidth = dimension;
+    function saveCalculatedDimensions(height,width) {
+        global.calcHeight = height;
+        global.calcWidth = width;
         
         console.log("calculating height & width... " + global.calcHeight + ", " + global.calcWidth);
     }
@@ -414,28 +417,40 @@ function initGameRoom(socket,roomCode) {
         resize();
     });
 
-    function resize(){
-        //resizes the canvas
+    function resize() {
+        // Calculate max dimensions
         calculateMaxDivSize();
         const correctCanvasSize = calculateCanvasSize(maxWidth, maxHeight);
         console.log('max width: ', correctCanvasSize);
         console.log('max height: ', correctCanvasSize);
     
+        // Update the wrapper dimensions
         const wrapperDiv = document.getElementById('mainDiv');
         if (wrapperDiv) {
             wrapperDiv.style.width = `${correctCanvasSize+50}px`;
             wrapperDiv.style.height = `${correctCanvasSize+50}px`;
         }
+    
+        // Update the canvas dimensions
         const canvas = document.getElementById('canvas');
         if (canvas) {
-            canvas.style.width = `${correctCanvasSize}px`;
+            canvas.style.width = `${correctCanvasSize / 2}px`;  // Half width for the canvas
             canvas.style.height = `${correctCanvasSize}px`;
         }
-        saveCalculatedDimensions(correctCanvasSize);
-        paper.view.viewSize.width = correctCanvasSize;
+    
+        // Update the adjacent div dimensions to match the canvas
+        const adjacentDiv = document.getElementById('adjacentDiv');
+        if (adjacentDiv) {
+            adjacentDiv.style.width = `${correctCanvasSize / 2}px`;  // Same half width as the canvas
+            adjacentDiv.style.height = `${correctCanvasSize}px`;
+        }
+    
+        saveCalculatedDimensions(correctCanvasSize, correctCanvasSize);
+        paper.view.viewSize.width = correctCanvasSize / 2;
         paper.view.viewSize.height = correctCanvasSize;
         updateMenuPositions();
     }
+    
     
     
 

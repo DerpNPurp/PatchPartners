@@ -27,6 +27,21 @@ function generateRoomCode() {
   return roomCode;
 }
 
+
+//list of all prompts
+const prompts = [
+  "Draw a heart!",
+  "Draw anything!"
+];
+
+
+function getRandomPrompt() {
+  const randomIndex = Math.floor(Math.random() * prompts.length);
+  return prompts[randomIndex];
+}
+
+
+
 io.on('connection', (socket) => {
   // Handle player disconnect
   socket.on('disconnect', (reason) => {
@@ -81,8 +96,10 @@ io.on('connection', (socket) => {
   socket.on('startGame', ({ roomCode }) => {
     const room = rooms[roomCode];
     if (room) {
+      const prompt = getRandomPrompt();
+      // console.log("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
       room.players.forEach(playerId => {
-        io.to(playerId).emit('startGame');
+        io.to(playerId).emit('startGame', {prompt});
       });
     }
   });

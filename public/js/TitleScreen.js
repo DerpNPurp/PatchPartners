@@ -153,7 +153,7 @@ export class TitleScreen {
     showTutorial() {
         //TODO: replace below with tutorial
         this.close();
-        initGameRoom(this.socket,111111);
+        initGameRoom(this.socket,111111,"prompt",true);
     }
 
     
@@ -373,9 +373,9 @@ export class TitleScreen {
         });
 
         // Listen for the event to start the game on both clients
-        this.socket.on('startGame', () => {
+        this.socket.on('startGame', ({prompt}) => {
             this.close();
-            initGameRoom(this.socket,roomCode);
+            initGameRoom(this.socket,roomCode,prompt, true);
         });
     }
 
@@ -442,9 +442,9 @@ export class TitleScreen {
         document.body.appendChild(overlay);
 
         // Listen for the event to start the game on both clients
-        this.socket.on('startGame', () => {
+        this.socket.on('startGame', ({prompt}) => {
             this.close();
-            initGameRoom(this.socket,roomCode);
+            initGameRoom(this.socket,roomCode,prompt,false);
         });
     }
 
