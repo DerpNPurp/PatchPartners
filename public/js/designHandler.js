@@ -406,18 +406,19 @@ DesignHandler.prototype.actionDesignDelete = function(params){
 DesignHandler.prototype.saveAllDesignsToFile = function(){
 	// this.closeActiveDesign(); // So they are all on this.designs // DEPRICATED?
 	var stPattern = new Pattern();
-	var firstStitch = null;
 	
 	// For each old design, in order, stitch them out jumping between each
 	for(var i = 0; i < this.designs.length; i++){
 		var pathPoints = this.designs[i].getPointsForPrinting();
+		var firstStitch = null;
 
 		// Before adding any stitches to sew, add a command to jump to the first stitch
 		if (pathPoints.length == 0){
 			console.log("PROBLEM: PATH POINTS EMPTY in design id" + i + " Continue")
-			continue;
+			break;
 		}
 		firstStitch = pathPoints[0];
+		console.log("DesignHandler.saveAllDesignsToFile Jumping to design " + i + " start point " + firstStitch);
 		stPattern.addStitchAbs(firstStitch.x*this.scale, firstStitch.y*this.scale, stitchTypes.jump, true);
 		
 		// For each point in this design, stitch to there!
