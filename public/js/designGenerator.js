@@ -111,7 +111,7 @@ DesignGenerator.prototype.parseToolParams =  function(params){
 		        newPath = this.echoPathWithAngle(params.path, this.gatherGenerationParams(params.generationSettings, params.type));
 		        break;
 		    case "plainSatin":
-		        
+		        newPath = this.applySatinToPath(params.path, this.gatherGenerationParams(params.generationSettings, params.type));
 		        break;
 		    
 		    default:
@@ -377,6 +377,49 @@ DesignGenerator.prototype.apply1DNoiseToPath = function(path, params){
 	return newPath;
 	
 };
+
+
+DesignGenerator.prototype.applySatinToPath = function(path, params){
+	var paramList = ["num_iterations", "persistence", "freq", "low", "high"];
+	
+	// BEWARE TYPOS WHENEVER USING checkParamKeysNotNull in this way
+	if(global.checkParamKeysNotNull(paramList, params) == false){
+		console.log("!!!! Potential problem with applyNoiseToPath, params may have a null value we need to not be null", params);
+		return;
+	}
+
+	var freq = params.freq;
+	var low = params.low;
+	var high = params.high;
+	
+	var newPath = path.clone();
+
+	for (var i = 0; i < newPath.segments.length; i++) {
+        // Calculate the zigzag value directly, alternating up and down
+        var tangentVector = null;
+		if (i < newPath.segments.length - 1) {
+			tangentVector = newPath.segments[i + 1].point.subtract(newPath.segments[i].point);
+		} else {
+			tangentVector = newPath.segments[i].point.subtract(newPath.segments[i - 1].point);
+		}
+
+		tangentVector = tangentVector.normalize();
+		var normalVector = new Point(-tangentVector.y, tangentVector.x);
+
+		var zigzagValue = (i % 2 === 0 ? high : low);
+        
+        // Apply the zigzag effect directly
+        var offsetX = normalVector.x * zigzagValue;
+        var offsetY = normalVector.y * zigzagValue;
+        
+        // Adjust the point position to create the zigzag effect
+        newPath.segments[i].point.x += offsetX;
+        newPath.segments[i].point.y += offsetY;
+    }
+	return newPath;
+	
+};
+
 
 // Applies two sets of noise at different parts of the length
 DesignGenerator.prototype.applyNoiseToPathTwice = function(path, params){

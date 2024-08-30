@@ -144,6 +144,23 @@ var toolLibrary = {
 		// Design settings needs 1 path
 		// No generation settings
 	),
+	plainSatin: new CustomTool(
+		"plainSatin", "drawing",
+		// canvas handler tool is a picker
+		// Design settings needs 2 paths
+		// Generation settings need density
+		{
+			strokeColor:'orange'
+		},
+		{
+			num_iterations: 1, 
+			persistence: 0.5,
+			freq: 0.01,
+			low: -10, 
+			high: 10,
+		}
+
+	),
 	sketchNoise: new CustomTool(
 		"sketchNoise", "drawing",
 		// Drawing settings for the line. These override the defaults
@@ -153,8 +170,8 @@ var toolLibrary = {
 		// "generationSettings"
 		{
 			num_iterations: 1, 
-			persistence: .5,
-			freq: .007, 
+			persistence: 0.5,
+			freq: 0.007, 
 			// normal noise is 0-1, remember this is pixels
 			// 10 gives us at least a solid number. with a distance away from the original point 
 			low: -20, 
@@ -296,12 +313,6 @@ var toolLibrary = {
 	// new generation settings
 	//////////////
 	/////////////////////
-	plainSatin: new CustomTool(
-		"plainSatin", "editing"
-		// canvas handler tool is a picker
-		// Design settings needs 2 paths
-		// Generation settings need density
-	),
 }; global.toolLibrary = toolLibrary;
 
 

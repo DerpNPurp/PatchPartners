@@ -50,7 +50,7 @@ var CanvasHandler = function(canvasID){
 		path.dashArray = [4, 0];
 		////////////////////////////////////////////////////////////////////
 		path.add(event.point);
-		
+		// We are currently trusting the mouse drag event detection of PaperJS
 		try{
 			if(path.segments.length == 2){
 				//global.mainDesignHandler.addPaperJSPath(path, true);
