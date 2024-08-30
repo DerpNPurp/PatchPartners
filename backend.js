@@ -27,6 +27,21 @@ function generateRoomCode() {
   return roomCode;
 }
 
+
+//list of all prompts
+const prompts = [
+  "Draw a heart!",
+  "Draw anything!"
+];
+
+
+function getRandomPrompt() {
+  const randomIndex = Math.floor(Math.random() * prompts.length);
+  return prompts[randomIndex];
+}
+
+
+
 io.on('connection', (socket) => {
   // Handle player disconnect
   socket.on('disconnect', (reason) => {
@@ -75,6 +90,39 @@ io.on('connection', (socket) => {
       }
     } else {
       socket.emit('joinFailure', 'Room does not exist.');
+    }
+  });
+  
+  socket.on('startGame', ({ roomCode }) => {
+    const room = rooms[roomCode];
+    if (room) {
+      const prompt = getRandomPrompt();
+      // console.log("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+      room.players.forEach(playerId => {
+        io.to(playerId).emit('startGame', {prompt});
+      });
+    }
+  });
+
+
+  socket.on('playerReady', ({ roomCode }) => {
+    if (!playersReady[roomCode]) {
+        playersReady[roomCode] = [];
+    }
+    playersReady[roomCode].push(socket.id);
+
+    if (playersReady[roomCode].length === 2 || roomCode == 111111) {
+      const startTime = Date.now();
+      playersReady[roomCode].forEach(playerSocketId => {
+          io.to(playerSocketId).emit('startDrawing');
+          io.to(playerSocketId).emit('startTimer', { duration: 120000, startTime }); // change this time when testing
+      });
+
+        // Clear the readiness list for the room
+        delete playersReady[roomCode];
+    } else {
+        // Notify the first player to wait for the other player
+        socket.emit('waitingForPlayer');
     }
   });
 

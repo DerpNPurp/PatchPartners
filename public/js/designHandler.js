@@ -406,32 +406,25 @@ DesignHandler.prototype.actionDesignDelete = function(params){
 DesignHandler.prototype.saveAllDesignsToFile = function(){
 	// this.closeActiveDesign(); // So they are all on this.designs // DEPRICATED?
 	var stPattern = new Pattern();
-	var firstStitch = null;
 	
 	// For each old design, in order, stitch them out jumping between each
 	for(var i = 0; i < this.designs.length; i++){
 		var pathPoints = this.designs[i].getPointsForPrinting();
+		var firstStitch = null;
 
 		// Before adding any stitches to sew, add a command to jump to the first stitch
-		if(i == 0){
-			if (pathPoints.length == 0){
-				console.log("PROBLEM: PATH POINTS EMPTY! SAVING EMPTY PATTERN!!! ABORT!")
-				return;
-			}
-			firstStitch = pathPoints[0];
-			stPattern.addStitchAbs(firstStitch.x*this.scale, firstStitch.y*this.scale, stitchTypes.jump, true);
+		if (pathPoints.length == 0){
+			console.log("PROBLEM: PATH POINTS EMPTY in design id" + i + " Continue")
+			break;
 		}
+		firstStitch = pathPoints[0];
+		console.log("DesignHandler.saveAllDesignsToFile Jumping to design " + i + " start point " + firstStitch);
+		stPattern.addStitchAbs(firstStitch.x*this.scale, firstStitch.y*this.scale, stitchTypes.jump, true);
 		
 		// For each point in this design, stitch to there!
 		for(var j = 0; j < pathPoints.length; j++){
 			var point = pathPoints[j];
 			this.fillInStitchGapsAndAddStitchAbs(stPattern, this.scale, point.x, point.y, stitchTypes.normal, true, this.threshold);//, stitchTypes.normal);
-		}
-		// If there are more designs after this one...
-		if(i < this.designs.length-1) {
-			// JUMP from the last stitch of this design to the first stitch of the next
-			//var firstStitch = this.designs[i+1].getFirstPoint();
-			//this.fillInStitchGapsAndAddStitchAbs(stPattern, this.scale, firstStitch.x, firstStitch.y, stitchTypes.jump, true, this.threshold);//, stitchTypes.normal);
 		}
 	}
 	
