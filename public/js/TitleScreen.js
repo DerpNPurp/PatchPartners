@@ -485,16 +485,16 @@ export class TitleScreen {
 
     getRandomSav(){
         const savAssets = [
-            'https://i.imgur.com/v0tWk1G.png', //disgust
-            'https://i.imgur.com/8Fo5FWh.png', //disgust looking left
-            'https://i.imgur.com/OS3O080.png', //nervous
-            'https://i.imgur.com/TbguH8W.png', //pointing left
-            'https://i.imgur.com/JTD2p9V.png', //excited
-            'https://i.imgur.com/fGzmvCl.png', //happy
-            'https://i.imgur.com/Dg9YTVn.png', //smirk
-            'https://i.imgur.com/Sdjr9qz.png', //waving
-            'https://i.imgur.com/mOwpPWH.png', //sad
-            'https://i.imgur.com/BpxvEMv.png', //angry
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Disgust.png', //disgust
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Nervous.png', //disgust looking left
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Nervous.png', //nervous
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Pointing.png', //pointing left
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Excited.png', //excited
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Happy.png', //happy
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Smirk.png', //smirk
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Waving.png', //waving
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Sad.png', //sad
+            'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Angry.png', //angry
         ];
         return savAssets[Math.floor(Math.random() * savAssets.length)];
     }
