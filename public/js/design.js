@@ -277,3 +277,17 @@ Design.prototype.calcDimensionsBasedOnPathPoints = function(){
 	this.dimensions.height = this.dimensions.bigY - this.dimensions.smallY;*/
 };
 
+Design.prototype.toJSON = function() {
+    return {
+        id: this.id,
+        pointCount: this.pointCount,
+        dimensions: this.dimensions,
+        paths: this.paths.map(path => path.toJSON()), // DesignPath to JSON
+        type: this.type,
+        currentAnchor: this.currentAnchor,
+        active: this.active,
+        lastSelectedParams: this.lastSelectedParams
+    };
+};
+
+

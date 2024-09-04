@@ -1,3 +1,4 @@
+
 function initGameRoom(socket,roomCode, prompt, player1) {
     //maxWidth and maxHeight represents the max possible size of the drawing canvas 
     let maxWidth;
@@ -207,12 +208,26 @@ function initGameRoom(socket,roomCode, prompt, player1) {
             } else {
                 timerElement.textContent = "Time's up!";
                 closeGameRoom();
-                showEndScreen();
+    
+                // Assuming playerNumber is available and defined in your scope.
+                const playerNumber = player1 ? 1 : 2;
+    
+                console.log(window.database); // This should log the database object
+
+                // Call the saveDesignsToFirebase function
+                if (typeof global.mainDesignHandler !== 'undefined' && global.mainDesignHandler.designs) {
+                    saveDesignsToFirebase(roomCode, playerNumber, global.mainDesignHandler.designs);
+                } else {
+                    console.error("Designs are not available to save.");
+                }
+    
+                showEndScreen(roomCode);
             }
         }
     
         updateTimer = requestAnimationFrame(updateTimerFunction);
     }
+    
     
 
     
@@ -468,6 +483,7 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         onLoad();
     }
 }
+
 
 // Export the function so it can be called from main.js
 window.initGameRoom = initGameRoom;

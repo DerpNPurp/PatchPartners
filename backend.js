@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
       const startTime = Date.now();
       playersReady[roomCode].forEach(playerSocketId => {
           io.to(playerSocketId).emit('startDrawing');
-          io.to(playerSocketId).emit('startTimer', { duration: 120000, startTime }); // change this time when testing
+          io.to(playerSocketId).emit('startTimer', { duration: 10000, startTime }); // change this time when testing
       });
 
         // Clear the readiness list for the room

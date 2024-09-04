@@ -1079,5 +1079,19 @@ DesignPath.prototype.generatePath = function(params){
 	this.dirtyPaths.generatedPath = false;
 };
 
+DesignPath.prototype.toJSON = function() {
+    return {
+		paperPath: this.paperPath ? JSON.parse(this.paperPath.exportJSON()) : null, 
+        // paperPath: this.paperPath ? this.paperPath.exportJSON() : null,
+        type: this.type,
+        stitchLengthMM: this.stitchLengthMM,
+        pixelsPerMM: this.pixelsPerMM,
+        lastUsedLineParams: this.lastUsedLineParams,
+        lastDisplaySettings: this.lastDisplaySettings,
+        active: this.active,
+    };
+};
+
+
 
 
