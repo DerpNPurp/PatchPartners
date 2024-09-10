@@ -80,7 +80,8 @@ paper.Path.prototype.stringifyPoints = function(separator){
 
 var DesignPath = function(parentDesign, pPath){
 	if (parentDesign == undefined || parentDesign == null){
-		console.log("PROBLEMMMMM!!! DESIGN PATH HAS NO PARENT DESIGN!");
+		//console.log("PROBLEMMMMM!!! DESIGN PATH HAS NO PARENT DESIGN!");
+		console.log("DesignPath has no parent design, assuming it is for final canvas printing")
 		
 	} else {
 		this.parentDesign = parentDesign;
@@ -1082,6 +1083,9 @@ DesignPath.prototype.generatePath = function(params){
 DesignPath.prototype.toJSON = function() {
     return {
 		paperPath: this.paperPath ? JSON.parse(this.paperPath.exportJSON()) : null, 
+		simplifediPath: this.derivitivePaths.simplifediPath ? JSON.parse(this.derivitivePaths.simplifediPath.exportJSON()) : null, 
+		flattenedPath: this.derivitivePaths.flattenedPath ? JSON.parse(this.derivitivePaths.flattenedPath.exportJSON()) : null, 
+		generatedPath: this.derivitivePaths.generatedPath ? JSON.parse(this.derivitivePaths.generatedPath.exportJSON()) : null, 
         // paperPath: this.paperPath ? this.paperPath.exportJSON() : null,
         type: this.type,
         stitchLengthMM: this.stitchLengthMM,

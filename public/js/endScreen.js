@@ -21,11 +21,11 @@ function displayPlayerDesign(playerDesigns,translation) {
         design.paths.forEach(pathData => {
             if (pathData.paperPath) {
                 // create a NEW path from the Paper.js path data
-                const path = new paper.Path();
-                path.importJSON(JSON.stringify(pathData.paperPath)); 
+                let path = new paper.Path();
+                path.importJSON(JSON.stringify(pathData.generatedPath)); 
 
-                if (pathData.lastDisplaySettings && pathData.lastDisplaySettings.path) {
-                    Object.assign(path, pathData.lastDisplaySettings.path);
+                if (pathData.lastDisplaySettings && pathData.lastDisplaySettings.generatedPath) {
+                    Object.assign(path, pathData.lastDisplaySettings.generatedPath);
                 }
 
                 //translation for player2's design
