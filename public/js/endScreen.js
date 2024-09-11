@@ -113,6 +113,7 @@ function showEndScreen(roomCode) {
     drawingContainer.appendChild(player1Div);
 
     loadDesignFromFirebase(roomCode, player1Div);
+    paper.view.update();
     
 
     const mainMenuBtn = document.createElement('button');

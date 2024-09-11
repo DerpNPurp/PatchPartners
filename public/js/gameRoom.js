@@ -468,13 +468,11 @@ function initGameRoom(socket,roomCode, prompt, player1) {
     
     
     
-
     function onLoad() {
         addHtmlContent();
         document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
         initApp();
         resize();
-        
     }
 
     if (document.readyState === 'loading') {
