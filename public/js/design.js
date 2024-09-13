@@ -24,6 +24,12 @@ var Design = function() {
 	return this;
 }; // Design
 
+Design.prototype.resize = function(scale){
+	this.paths.forEach(path => {
+        //console.log("Path object type:", typeof path, path.constructor.name);  // Log the constructor name
+		path.scale(scale);
+	});
+};
 
 ////////////////////////////////////////////////////////////////////////
 /////// ACCESSORS //////////////////////////////////////////////////////

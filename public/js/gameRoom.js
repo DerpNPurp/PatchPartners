@@ -3,12 +3,11 @@ function initGameRoom(socket,roomCode, prompt, player1) {
     let maxWidth;
     let maxHeight;
     let updateTimer;
-
+    let oldCanvasSize;
+    
     console.log("Initializing game room...");
     console.log("Prompt received:", prompt);
-
   
-
     function calculateCanvasSize(width, height){
         //Since the canvas has to be a multiple of 100px by 100px, calculate the size of the canvas
         let minNumber = Math.min(width, height);
@@ -38,8 +37,6 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         console.log(`Max width: ${maxWidth}px, Max height: ${maxHeight}px`);
     
     }
-
-    
 
     function addHtmlContent() {
         // calculates the max size of the canvas 
@@ -186,8 +183,6 @@ function initGameRoom(socket,roomCode, prompt, player1) {
             document.getElementById('waitingMessage').textContent = "Waiting for other player...";
         });
     }
-    
-
 
     function startCountdownTimer(duration, startTime) {
         const timerElement = document.getElementById('timer');
@@ -213,9 +208,6 @@ function initGameRoom(socket,roomCode, prompt, player1) {
     
         updateTimer = requestAnimationFrame(updateTimerFunction);
     }
-    
-
-    
 
     function closePopup() {
         var popup = document.querySelector('.sav-popup');
@@ -269,11 +261,7 @@ function initGameRoom(socket,roomCode, prompt, player1) {
     
         
         console.log("Game room closed.");
-    }
-    
-    
-
-
+    } 
 
     function handleFileSelection(evt) {
         evt.stopPropagation();
@@ -420,8 +408,15 @@ function initGameRoom(socket,roomCode, prompt, player1) {
     function resize() {
         // Calculate max dimensions
         calculateMaxDivSize();
+        const canvas = document.getElementById('canvas');
+        if (canvas) {
+            oldCanvasSize = parseInt(canvas.style.height, 10) || 600;
+            console.log('oldCanvasSize: ', oldCanvasSize);
+        }
+
         const correctCanvasSize = calculateCanvasSize(maxWidth, maxHeight);
-        console.log('max width: ', correctCanvasSize);
+        console.log('correctCanvasSize:', correctCanvasSize);
+        console.log('max width: ', correctCanvasSize / 2);
         console.log('max height: ', correctCanvasSize);
     
         // Update the wrapper dimensions
@@ -432,7 +427,6 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         }
     
         // Update the canvas dimensions
-        const canvas = document.getElementById('canvas');
         if (canvas) {
             canvas.style.width = `${correctCanvasSize / 2}px`;  // Half width for the canvas
             canvas.style.height = `${correctCanvasSize}px`;
@@ -444,22 +438,27 @@ function initGameRoom(socket,roomCode, prompt, player1) {
             adjacentDiv.style.width = `${correctCanvasSize / 2}px`;  // Same half width as the canvas
             adjacentDiv.style.height = `${correctCanvasSize}px`;
         }
-    
+        
         saveCalculatedDimensions(correctCanvasSize, correctCanvasSize);
-        paper.view.viewSize.width = correctCanvasSize / 2;
-        paper.view.viewSize.height = correctCanvasSize;
         updateMenuPositions();
+        
+        // console.log('New canvas size: ', correctCanvasSize);
+	    // if (oldCanvasSize === 0) {
+		//     return;
+	    // }
+        const scale = correctCanvasSize / oldCanvasSize;  
+        global.mainDesignHandler.resize(scale);
+
+        paper.view.viewSize = new paper.Size(correctCanvasSize / 2, correctCanvasSize); // Adjust width based on player split
+	    
+
     }
-    
-    
-    
 
     function onLoad() {
         addHtmlContent();
         document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
         initApp();
-        resize();
-        
+        resize();        
     }
 
     if (document.readyState === 'loading') {

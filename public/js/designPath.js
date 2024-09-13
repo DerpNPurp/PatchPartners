@@ -1079,5 +1079,24 @@ DesignPath.prototype.generatePath = function(params){
 	this.dirtyPaths.generatedPath = false;
 };
 
+DesignPath.prototype.scale = function(scale) {
 
+	if (this.paperPath !== null) {
+		this.paperPath.scale(scale, new Point(0, 0));
+	}
+
+	if (this.derivitivePaths.simplifiedPath !== null) {
+		this.derivitivePaths.simplifiedPath.scale(scale, new Point(0, 0));
+    }
+
+    if (this.derivitivePaths.flattenedPath !== null) {
+		this.derivitivePaths.flattenedPath.scale(scale, new Point(0, 0));
+    }
+
+    if (this.derivitivePaths.generatedPath !== null) {
+		this.derivitivePaths.generatedPath.scale(scale, new Point(0, 0));
+    }
+
+    this.setAllPathsDirty();
+};
 

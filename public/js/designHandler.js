@@ -7,8 +7,6 @@
 	//		vs the event action that keeps track of the path being created.
 	// TODO this, we must make it such that mouse-move edits an active path that is not official
 	// And only on mouse up do we officially add the path to this.designs and the global action tracker
-
-
 var DesignHandler = function(){
 	this.designs = [];
 	// DRASTIC DESIGN CHANGE:
@@ -252,6 +250,13 @@ DesignHandler.prototype.regenerateSpecificDesignPaths = function(ref, params){
 		global.mainErrorHandler.errorMsg("3 regenerateSpecificDesignPaths failed to generate with ref " + ref, this, e);
 		return null;
 	}
+};
+
+DesignHandler.prototype.resize = function(scale){
+	// Apply scaling to the paths
+	this.designs.forEach(path => {
+		path.resize(scale);
+	});
 };
 
 DesignHandler.prototype.regenerateAllDerivedPaths = function(inputParams){

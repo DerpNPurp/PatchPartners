@@ -181,7 +181,7 @@ html, body {
 }
 
 .toolplainLine, #tool_button_plainLine {
-    background-image: url(../media/toolIcon.png);
+    background-image: url(../media/plainLine.png);
 }
 
 .toolsketchNoise, #tool_button_sketchNoise {
