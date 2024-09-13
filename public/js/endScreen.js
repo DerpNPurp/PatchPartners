@@ -1,39 +1,138 @@
-function showEndScreen() {
-    // Remove any existing end screen elements
+// create a NEW canvas just for the endscreen to display drawings
+function createEndScreenCanvas(drawingDiv) {
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'endScreenCanvas';
+    canvas.width = 500; // TODO: CHANGE THIS SO ITS NOT HARDCODED
+    canvas.height = 500;
+    canvas.style.backgroundColor = 'white'; 
+
+    drawingDiv.innerHTML = ''; 
+    drawingDiv.appendChild(canvas); 
+
+    // Initialize Paper.js
+    paper.setup(canvas);
+
+    return canvas;
+}
+
+function displayPlayerDesign(playerDesigns,translation) {
+    playerDesigns.forEach(design => {
+        design.paths.forEach(pathData => {
+            if (pathData.paperPath) {
+                // create a NEW path from the Paper.js path data
+                let path = new paper.Path();
+                path.importJSON(JSON.stringify(pathData.generatedPath)); 
+
+                if (pathData.lastDisplaySettings && pathData.lastDisplaySettings.generatedPath) {
+                    Object.assign(path, pathData.lastDisplaySettings.generatedPath);
+                }
+
+                //translation for player2's design
+                if (translation !== 0) {
+                    path.translate(new paper.Point(translation, 0));
+                }
+
+                // add the path to the canvas which DISPLAYS it
+                path.addTo(paper.project);
+            }
+        });
+    });
+
+    // refresh the canvas
+    paper.view.update();
+}
+
+
+
+
+function loadDesignFromFirebase(roomCode, drawingDiv) {
+    const player1DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player1`);
+    const player2DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player2`);
+
+    //variable for "is player's design loaded from firebase"
+    let player1Loaded = false;
+    let player2Loaded = false;
+
+
+    onValue(player1DesignsRef, (snapshot) => {
+        const player1Data = snapshot.val();
+        //if either player's design is empty (didnt draw anythig), use an empty list
+        const restoredPlayer1DesignsData = player1Data ? restoreInvalidKeys(player1Data) : [];
+        player1Loaded = true;
+        
+        //repeat for player 2
+        onValue(player2DesignsRef, (player2Snapshot) => {
+            const player2Data = player2Snapshot.val();
+            const restoredPlayer2Data = player2Data ? restoreInvalidKeys(player2Data) : [];
+            player2Loaded = true;
+
+
+            if (player1Loaded && player2Loaded) {
+                const canvas = createEndScreenCanvas(drawingDiv);
+
+                displayPlayerDesign(restoredPlayer1DesignsData);
+
+                const translationDistance = 250; // TODO: change so width isnt hard coded
+                displayPlayerDesign(restoredPlayer2Data, translationDistance);
+            }
+        });
+    });
+}
+
+
+
+function showEndScreen(roomCode) {
+
     const existingEndScreen = document.getElementById('endScreen');
     if (existingEndScreen) {
         existingEndScreen.remove();
     }
 
-    // Create the end screen container
     const endScreenDiv = document.createElement('div');
     endScreenDiv.id = 'endScreen';
 
-    // Create the game title element
+    //create the title
     const title = document.createElement('div');
     title.id = 'gameTitle';
     title.textContent = 'PatchPartners';
 
-    // Create the drawing container
-    const drawingDiv = document.createElement('div');
-    drawingDiv.id = 'finishedDrawing';
+    
+    //Original approach: create a container that contains both player's drawing side by side
+    //CAN REMOVE THIS.
+    const drawingContainer = document.createElement('div');
+    drawingContainer.id = 'drawingContainer';
+    drawingContainer.style.display = 'flex';
 
-    // Create the main menu button
+
+    const player1Div = document.createElement('div');
+    player1Div.id = 'player1Drawing';
+    player1Div.style.flex = '1';
+    player1Div.style.backgroundColor = 'white';
+    player1Div.textContent = 'Loading design...';
+    drawingContainer.appendChild(player1Div);
+
+    loadDesignFromFirebase(roomCode, player1Div);
+    paper.view.update();
+    
+
     const mainMenuBtn = document.createElement('button');
     mainMenuBtn.id = 'mainMenuBtn';
     mainMenuBtn.textContent = 'Main Menu';
     mainMenuBtn.onclick = function () {
-        window.location.reload(); // Reload the page to go back to the title screen
+        window.location.reload(); 
     };
+    
+    
 
-    // Append the elements to the end screen container
+
     endScreenDiv.appendChild(title);
-    endScreenDiv.appendChild(drawingDiv);
+    endScreenDiv.appendChild(drawingContainer);
     endScreenDiv.appendChild(mainMenuBtn);
 
-    // Append the end screen to the body
+
     document.body.appendChild(endScreenDiv);
 }
 
-// Export the function so it can be called from gameRoom.js
+
 window.showEndScreen = showEndScreen;

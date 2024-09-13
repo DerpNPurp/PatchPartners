@@ -5,7 +5,17 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 
 const io = new Server(server, { pingInterval: 2000, pingTimeout: 5000 });
-const port = 3000;
+const port = process.env.PORT || 8080;
+
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
+
+// Main route to serve index.html
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+
 
 const backEndPlayers = {};
 const rooms = {};
@@ -115,7 +125,7 @@ io.on('connection', (socket) => {
       const startTime = Date.now();
       playersReady[roomCode].forEach(playerSocketId => {
           io.to(playerSocketId).emit('startDrawing');
-          io.to(playerSocketId).emit('startTimer', { duration: 120000, startTime }); // change this time when testing
+          io.to(playerSocketId).emit('startTimer', { duration: 10000, startTime }); // change this time when testing
       });
 
         // Clear the readiness list for the room

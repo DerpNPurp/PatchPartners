@@ -511,3 +511,69 @@ DesignHandler.prototype.fillInStitchGapsAndAddStitchAbs = function(stPattern, sc
 	stPattern.addStitchAbs(tempX, tempY, flags, color);
 };
 
+//FIREBASE does not allowed UNDEFINED as an input. SO, delete all undefined
+function cleanUndefined(obj) {
+    for (let key in obj) {
+        if (obj[key] === undefined) {
+            // Remove the undefined value 
+            delete obj[key];
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            // Recursively clean nested objects
+            cleanUndefined(obj[key]);
+        }
+    }
+}
+
+function cleanInvalidKeys(obj) {
+    for (let key in obj) {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+            cleanInvalidKeys(obj[key]);
+        }
+
+        // '.' are INVALID keys so replace them with '_' temporarily
+		//IMPORTANT: when loading the designs, replace all '_' back with '.'
+        if (key.includes('.')) {
+            const newKey = key.replace(/\./g, '_');
+            obj[newKey] = obj[key];
+            delete obj[key];
+        }
+    }
+}
+
+// Function to transform underscores back to dots in object keys
+function restoreInvalidKeys(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+        return obj;
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(item => restoreInvalidKeys(item));
+    }
+
+    return Object.keys(obj).reduce((acc, key) => {
+        const transformedKey = key.replace(/_/g, '.'); // Replace underscores with dots
+        acc[transformedKey] = restoreInvalidKeys(obj[key]);
+        return acc;
+    }, {});
+}
+
+function saveDesignsToFirebase(roomCode, playerNumber, designs) {
+    const designData = designs.map(design => {
+        const designJSON = design.toJSON();
+        cleanUndefined(designJSON); 
+        cleanInvalidKeys(designJSON);
+        return designJSON;
+    });
+    
+    const playerKey = playerNumber === 1 ? 'player1' : 'player2';
+    const designsRef = ref(window.database, `rooms/${roomCode}/designs/${playerKey}`);
+
+    set(designsRef, designData)
+        .then(() => {
+            console.log(`Designs successfully saved for ${playerKey} to Firebase!`);
+        })
+        .catch((error) => {
+            console.error(`Error saving designs for ${playerKey}:`, error);
+        });
+}
+
