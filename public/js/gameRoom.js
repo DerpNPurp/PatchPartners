@@ -1,22 +1,22 @@
-
-function initGameRoom(socket,roomCode, prompt, player1) {
-    //maxWidth and maxHeight represents the max possible size of the drawing canvas 
+function initGameRoom(socket, roomCode, prompt, player1) {
+    // maxWidth and maxHeight represent the max possible size of the drawing canvas 
     let maxWidth;
     let maxHeight;
     let updateTimer;
     let oldCanvasSize;
-    
+
     console.log("Initializing game room...");
     console.log("Prompt received:", prompt);
-  
-    function calculateCanvasSize(width, height){
-        //Since the canvas has to be a multiple of 100px by 100px, calculate the size of the canvas
+
+    //Function to calculate the canvas size based on the screen dimensions
+    //The canvas size must be a multiple of 100px
+    function calculateCanvasSize(width, height) {
+        //Calculate the smallest dimension and round it down to the nearest 100px
         let minNumber = Math.min(width, height);
         return Math.floor(minNumber / 100) * 100 - 100;
-
     }
-    
-    //creates a temp div to get the max size of the canvas
+
+    //Creates a temporary div to measure the maximum available canvas size
     function calculateMaxDivSize() {
         const tempDiv = document.createElement('div');
         tempDiv.style.position = 'absolute';
@@ -25,107 +25,86 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         tempDiv.style.height = '100%';
         tempDiv.style.left = '0';
         tempDiv.style.top = '0';
-        
-       
+
         const parentElement = document.body; 
         parentElement.appendChild(tempDiv);
-    
+
         maxWidth = tempDiv.clientWidth;
         maxHeight = tempDiv.clientHeight;
-    
+
         parentElement.removeChild(tempDiv);
-    
+
         console.log(`Max width: ${maxWidth}px, Max height: ${maxHeight}px`);
-    
     }
 
+    //Adds all HTML content dynamically ( title, canvas, and prompt )
     function addHtmlContent() {
-        // calculates the max size of the canvas 
-        // calculateMaxDivSize();
-        // const canvasSize = calculateCanvasSize(maxWidth, maxHeight);
-        
+        //Setting meta tag and document title
         document.xmlns = "http://www.w3.org/1999/xhtml";
         document.head.innerHTML = `
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
             <title>PatchPartners</title>
         `;
-        var link1 = document.createElement('link');
-        link1.rel = "stylesheet";
-        link1.type = "text/css";
-        link1.href = "css/jquery-ui.css";
-    
-        var link2 = document.createElement('link');
-        link2.rel = "stylesheet";
-        link2.type = "text/css";
-        link2.href = "css/jquery-ui.theme.css";
-    
-        var link3 = document.createElement('link');
-        link3.rel = "stylesheet";
-        link3.type = "text/css";
-        link3.href = "css/sewsynth.css";
-    
-        //Attached the css for the end screen
-        var link4 = document.createElement('link');
-        link4.rel = "stylesheet";
-        link4.type = "text/css";
-        link4.href = "css/endScreen.css"; 
-    
-        // Create the main divs
+        
+        //Create link elements for stylesheets
+        var link1 = createLinkElement("css/jquery-ui.css");
+        var link2 = createLinkElement("css/jquery-ui.theme.css");
+        var link3 = createLinkElement("css/sewsynth.css");
+        var link4 = createLinkElement("css/endScreen.css");
+
+        //Create the main div elements (contains the canvas and brush bar)
         var mainDiv = document.createElement('div');
         var parentDiv = document.createElement('div');
         parentDiv.className = "fill-area";
         parentDiv.id = "hundred";
         parentDiv.style.position = 'relative';
-    
-        // Title row div at the top
+
+        //Create title row
         var titleRowDiv = document.createElement('div');
         titleRowDiv.id = "titleRow";
-    
-        // Title inside the title row
+
+        //Create title inside the title row
         var titleDiv = document.createElement('div');
         titleDiv.id = "gameTitle";
         titleDiv.textContent = "PatchPartners";
-    
+
         titleRowDiv.appendChild(titleDiv);
         mainDiv.appendChild(titleRowDiv);
-    
-        // Timer div
+
+        //Timer div
         var timerDiv = document.createElement('div');
         timerDiv.id = "timer";
-    
-        // Wrapper div that contains the canvas
+
+        //Wrapper div that contains the canvas
         var wrapperDiv = document.createElement('div');
         wrapperDiv.className = "wrapper";
         wrapperDiv.id = "mainDiv";
         wrapperDiv.style.display = "flex"; // Ensure it behaves as a flex container
-    
-        // Create the canvas div
+
+        //Create the canvas div (where players draw)
         var canvasDiv = document.createElement('canvas');
         canvasDiv.id = "canvas";
-        
-    
-        // Create the adjacent div/ fake canvas that will eventually hold other player's drawing
+
+        //Create the adjacent div/fake canvas that will hold the other player's drawing
         var adjacentDiv = document.createElement('div');
         adjacentDiv.id = 'adjacentDiv';
-        
-    
+
         //Depending on player number, they are assigned the left or right half of the canvas
-        //Player1 = left
-        //Player2 = right
-        if(player1){
+        //Player1 = left, Player2 = right
+        //TODO: randomize this?
+        if (player1) {
             wrapperDiv.appendChild(canvasDiv);
             wrapperDiv.appendChild(adjacentDiv);
-        
-        }else{
+        } else {
             wrapperDiv.appendChild(adjacentDiv);
             wrapperDiv.appendChild(canvasDiv);
         }
-    
-        // Append the wrapper and timer to the parent div
+
+        //Append the wrapper and timer to the parent div
         parentDiv.appendChild(wrapperDiv);
         parentDiv.appendChild(timerDiv);
-    
-        
+
+        //Create and append additional div for image options and toolbox
         var additionalDiv = document.createElement('div');
         additionalDiv.innerHTML = `
             <div class="menu_div" id="image_options">Image Options
@@ -135,94 +114,102 @@ function initGameRoom(socket,roomCode, prompt, player1) {
             <div class="menu_div_nonExpanding" id="toolbox"></div>
         `;
         additionalDiv.id = 'imageOptions';
-    
+
         parentDiv.appendChild(additionalDiv);
         mainDiv.appendChild(parentDiv);
-    
+
         document.body.appendChild(mainDiv);
+
+        //Attach all stylesheets to the document head
         document.head.appendChild(link1);
         document.head.appendChild(link2);
         document.head.appendChild(link3);
         document.head.appendChild(link4);
         console.log("Append Children");
-    
-        // Transparent overlay behind the prompt
+
+        //Transparent overlay behind the prompt
         const overlay = document.createElement('div');
         overlay.id = 'savOverlay';
         document.body.appendChild(overlay);
-    
-        // The prompt popup before the game starts
-        // const selectedPrompt = getRandomPrompt();
-        var popup = document.createElement('div');
-        popup.className = "sav-popup";
-        popup.innerHTML = `
-            <div class="sav-popup-content">
-                <img src="https://i.imgur.com/8Fo5FWh.png" alt="Sav" class="sav-image">
-                <p class="sav-prompt">Your drawing prompt is: <strong>${prompt}</strong></p>
-                <button id="startDrawingBtn" class="start-drawing-btn">Start Drawing</button>
-                <p id="waitingMessage" style="display: none;">Waiting for other player...</p>
-            </div>
-        `;
+
+        //Add the prompt popup before the game starts
+        var popup = createPopup(prompt);
         document.body.appendChild(popup);
         console.log("Sav Popup added");
-    
+
+        //Event listener for the "Start Drawing" button
         document.getElementById('startDrawingBtn').addEventListener('click', () => {
             socket.emit('playerReady', { roomCode });
             document.getElementById('startDrawingBtn').style.display = 'none';
             document.getElementById('waitingMessage').style.display = 'block';
         });
-    
+
+        //Socket events for game state synchronization
         socket.on('startDrawing', () => {
             closePopup();
         });
-    
+
         socket.on('startTimer', ({ duration, startTime }) => {
             startCountdownTimer(duration, startTime);
         });
-    
+
         socket.on('waitingForPlayer', () => {
             document.getElementById('waitingMessage').textContent = "Waiting for other player...";
         });
     }
 
+    //Countdown timer for the game
     function startCountdownTimer(duration, startTime) {
         const timerElement = document.getElementById('timer');
         const endTime = startTime + duration;
-    
+
         function updateTimerFunction() {
             const currentTime = Date.now();
             const timeLeft = Math.max(0, endTime - currentTime);
-    
+
             const minutes = Math.floor(timeLeft / 60000);
             const seconds = Math.floor((timeLeft % 60000) / 1000);
-    
+
             timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    
+
             if (timeLeft > 0) {
                 updateTimer = requestAnimationFrame(updateTimerFunction);
             } else {
                 timerElement.textContent = "Time's up!";
-                closeGameRoom();
-    
-                // Assuming playerNumber is available and defined in your scope.
-                const playerNumber = player1 ? 1 : 2;
-    
-                console.log(window.database); // This should log the database object
-
-                // Call the saveDesignsToFirebase function
-                if (typeof global.mainDesignHandler !== 'undefined' && global.mainDesignHandler.designs) {
-                    saveDesignsToFirebase(roomCode, playerNumber, global.mainDesignHandler.designs);
-                } else {
-                    console.error("Designs are not available to save.");
-                }
-    
-                showEndScreen(roomCode);
+                endGame();  // End the game, save designs, and show the end screen
+                closeGameRoom(); 
+                
             }
         }
-    
+
         updateTimer = requestAnimationFrame(updateTimerFunction);
     }
 
+    //Function to save player designs and scale them to 500px before saving
+    function savePlayerDesigns(roomCode, playerNumber) {
+        const canvas = document.getElementById('canvas');
+        oldCanvasSize = parseInt(canvas.style.height, 10) || 500; 
+
+        //Before storing the path details, scale the drawings to 500px so that both drawings are the same size
+        const scale = 500 / oldCanvasSize;
+        global.mainDesignHandler.resize(scale);
+
+        //Save the designs to Firebase
+        if (typeof global.mainDesignHandler !== 'undefined' && global.mainDesignHandler.designs) {
+            saveDesignsToFirebase(roomCode, playerNumber, global.mainDesignHandler.designs);
+        } else {
+            console.error("Designs are not available to save.");
+        }
+    }
+
+    //Ends the game, saves designs, and shows the end screen
+    function endGame() {
+        const playerNumber = player1 ? 1 : 2;
+        savePlayerDesigns(roomCode, playerNumber);
+        showEndScreen(roomCode);
+    }
+
+    //Closes the prompt overlay at the start of the game
     function closePopup() {
         var popup = document.querySelector('.sav-popup');
         var overlay = document.getElementById('savOverlay');
@@ -235,34 +222,33 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         console.log("Popup closed, game started");
     }
 
+    //Cleans up and closes the game room after the game ends
     function closeGameRoom() {
         console.log("Closing game room...");
-    
-        // Check if the updateTimer is defined and stop any ongoing timers or animations
+
+        //Stop any ongoing timers or animations
         if (window.updateTimer) {
             window.cancelAnimationFrame(window.updateTimer);
             window.updateTimer = null;
         }
-    
-        // Remove the gameroom elements
+
+        //Remove game room elements
         const mainDiv = document.getElementById('hundred');
         if (mainDiv) {
             mainDiv.remove();
         }
-    
-        // Remove the title
+
         const titleRow = document.getElementById('titleRow');
         if (titleRow) {
             titleRow.remove();
         }
-    
-        // Remove any popups
+
         const popup = document.querySelector('.sav-popup');
         if (popup) {
             popup.remove();
         }
-    
-        // Clean up any global variables or event listeners
+
+        //Clean up global variables or event listeners
         if (window.mainCanvasHandler) {
             window.mainCanvasHandler = null;
         }
@@ -272,10 +258,10 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         if (window.mainDesignHandler) {
             window.mainDesignHandler = null;
         }
-    
-        
+
         console.log("Game room closed.");
-    } 
+    }
+
 
     function handleFileSelection(evt) {
         evt.stopPropagation();
@@ -318,11 +304,10 @@ function initGameRoom(socket,roomCode, prompt, player1) {
             
             initilizeMenus(); // in guiHandler.js 
             console.log("6");
-            // Move the menus over... need to also update this on resize...
-            updateMenuPositions();
+            updateMenuPositions(); // Move menus over, also update on resize...
             console.log("7");
             
-            initKeys();
+            initKeys(); // Initialize key bindings
         
             console.log("ready!");
         } catch (e) {
@@ -346,7 +331,6 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         saveCalculatedDimensions();
         console.log("8");
         global.mainCanvasHandler = new CanvasHandler("canvas");
-    
     }
 
     function initDesignHandler() {
@@ -371,56 +355,26 @@ function initGameRoom(socket,roomCode, prompt, player1) {
     }
 
     function updateKeyEvent(e) {
-        e = e || event; // to deal with IE
+        e = e || event; 
         global.keyMap[e.keyCode] = e.type == 'keydown';
     }
 
-    function saveCalculatedDimensions(height,width) {
+    //Saves the calculated dimensions for the canvas (globally)
+    function saveCalculatedDimensions(height, width) {
         global.calcHeight = height;
         global.calcWidth = width;
         
         console.log("calculating height & width... " + global.calcHeight + ", " + global.calcWidth);
     }
 
-    function displayFileImg(filename, evt) {
-        var view = new jDataView(evt.target.result, 0, evt.size);
-    }
-
-    window.onkeyup = function(e) {
-        updateKeyEvent(e);
-        if (global.keyMap[17] == false || global.keyMap[90] == false) {
-            global.keyEventFired.undo = false;
-        }
-        if (global.keyMap[17] == false || global.keyMap[89] == false) {
-            global.keyEventFired.redo = false;
-        }
-    };
-
-    window.onkeydown = function(e) {
-        var oldKeyMap = global.keyMap;
-        updateKeyEvent(e);
-        if (global.mainHistoryHandler !== null) {
-            if (global.keyMap[17] == true && global.keyMap[90] == true &&
-                global.keyEventFired.undo == false) {
-                global.mainHistoryHandler.doUndo();
-                console.log("UNDOOOOOO");
-                global.keyEventFired.undo = true;
-            }
-            if (global.keyMap[17] == true && global.keyMap[89] == true &&
-                global.keyEventFired.redo == false) {
-                global.mainHistoryHandler.doRedo();
-                console.log("REdooo");
-                global.keyEventFired.redo = true;
-            }
-        }
-    };
-
+    //Handle resizing of the window and adjust canvas dimensions
     window.addEventListener("resize", function() {
         resize();
     });
 
+    //Resizes the canvas and updates the canvas based on window size
     function resize() {
-        // Calculate max dimensions
+        //Calculate max dimensions
         calculateMaxDivSize();
         const canvas = document.getElementById('canvas');
         if (canvas) {
@@ -432,56 +386,75 @@ function initGameRoom(socket,roomCode, prompt, player1) {
         console.log('correctCanvasSize:', correctCanvasSize);
         console.log('max width: ', correctCanvasSize / 2);
         console.log('max height: ', correctCanvasSize);
-    
-        // Update the wrapper dimensions
+
+        //Update the wrapper dimensions
         const wrapperDiv = document.getElementById('mainDiv');
         if (wrapperDiv) {
-            wrapperDiv.style.width = `${correctCanvasSize+50}px`;
-            wrapperDiv.style.height = `${correctCanvasSize+50}px`;
+            wrapperDiv.style.width = `${correctCanvasSize + 50}px`;
+            wrapperDiv.style.height = `${correctCanvasSize + 50}px`;
         }
-    
-        // Update the canvas dimensions
+
+        //Update the canvas dimensions
         if (canvas) {
-            canvas.style.width = `${correctCanvasSize / 2}px`;  // Half width for the canvas
+            canvas.style.width = `${correctCanvasSize / 2}px`;  //Half width for one player
             canvas.style.height = `${correctCanvasSize}px`;
         }
-    
-        // Update the adjacent div dimensions to match the canvas
+
+        //Update the adjacent div dimensions to match the canvas
         const adjacentDiv = document.getElementById('adjacentDiv');
         if (adjacentDiv) {
-            adjacentDiv.style.width = `${correctCanvasSize / 2}px`;  // Same half width as the canvas
+            adjacentDiv.style.width = `${correctCanvasSize / 2}px`;  //Same half width as the canvas
             adjacentDiv.style.height = `${correctCanvasSize}px`;
         }
-        
+
         saveCalculatedDimensions(correctCanvasSize, correctCanvasSize);
         updateMenuPositions();
-        
-        // console.log('New canvas size: ', correctCanvasSize);
-	    // if (oldCanvasSize === 0) {
-		//     return;
-	    // }
+
+        //Scale the drawing to match the new canvas size
         const scale = correctCanvasSize / oldCanvasSize;  
         global.mainDesignHandler.resize(scale);
 
         paper.view.viewSize = new paper.Size(correctCanvasSize / 2, correctCanvasSize); // Adjust width based on player split
-	    
-
     }
 
+    //Initialize the app and start the game room
     function onLoad() {
-        addHtmlContent();
+        addHtmlContent(); //Add the HTML content dynamically
         document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
-        initApp();
-        resize();
+        initApp(); //Initialize canvas, design handlers, and more
+        resize(); //Perform initial resize and adjust layout
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onLoad);
+        document.addEventListener('DOMContentLoaded', onLoad); //Load when DOM is ready
     } else {
-        onLoad();
+        onLoad(); //Load immediately if DOM is already ready
     }
 }
 
-
-// Export the function so it can be called from main.js
+//Export the function so it can be called from main.js
 window.initGameRoom = initGameRoom;
+
+//Utility functions for creating elements
+function createLinkElement(href) {
+    const link = document.createElement('link');
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href = href;
+    return link;
+}
+
+//Creates the prompt popup before the game starts
+function createPopup(prompt) {
+    const popup = document.createElement('div');
+    popup.className = "sav-popup";
+    popup.innerHTML = `
+        <div class="sav-popup-content">
+            <img src="https://i.imgur.com/8Fo5FWh.png" alt="Sav" class="sav-image">
+            <p class="sav-prompt">Your drawing prompt is: <strong>${prompt}</strong></p>
+            <button id="startDrawingBtn" class="start-drawing-btn">Start Drawing</button>
+            <p id="waitingMessage" style="display: none;">Waiting for other player...</p>
+        </div>
+    `;
+    return popup;
+}

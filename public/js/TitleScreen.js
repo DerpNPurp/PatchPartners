@@ -11,6 +11,7 @@ export class TitleScreen {
                 label: "START",
                 description: "Press to begin choosing which mode to play",
                 handler: () => {
+                    resolve();
                     this.showStartScreen(resolve);
                 }
             },
