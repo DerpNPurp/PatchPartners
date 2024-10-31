@@ -120,6 +120,35 @@ function initGameRoom(socket,roomCode, prompt, player1) {
             wrapperDiv.appendChild(adjacentDiv);
             wrapperDiv.appendChild(canvasDiv);
         }
+
+        const pinkBox = document.createElement("div");
+        pinkBox.classList.add("pinkBox");
+        
+        // Create a new container for the character and speech bubble
+        const characterContainer = document.createElement("div");
+        characterContainer.id = "characterContainer";
+        characterContainer.style.width = '1000px';
+
+        // Create the character image
+        const gameRmSav = document.createElement("img");
+        gameRmSav.id = "gameRmSav";
+        gameRmSav.src = 'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Excited.png';
+        gameRmSav.style.width = '350px';
+        pinkBox.appendChild(gameRmSav);
+        parentDiv.appendChild(pinkBox);
+
+        const speechBubble = document.createElement("img");
+        speechBubble.id = "speechBubble";
+        speechBubble.src = 'https://cdn.discordapp.com/attachments/1161175125404680362/1299038584858480670/speech-bubble-thought-bubble-comic-bubble-transparent-free-free-png.png?ex=671bbf75&is=671a6df5&hm=e3a4ed0299e6a70da18c964eaebfa36dec42b1bbeaa8a82c726da9736c748aab&';
+        speechBubble.style.width = '310px';
+        // Append character and speech bubble to the container
+        characterContainer.appendChild(pinkBox);
+        characterContainer.appendChild(speechBubble);
+
+        // Append the container to the parent div
+        parentDiv.appendChild(characterContainer);
+
+
     
         // Append the wrapper and timer to the parent div
         parentDiv.appendChild(wrapperDiv);

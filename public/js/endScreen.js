@@ -1,14 +1,13 @@
-// create a NEW canvas just for the endscreen to display drawings
 function createEndScreenCanvas(drawingDiv) {
-
     const canvas = document.createElement('canvas');
     canvas.id = 'endScreenCanvas';
-    canvas.width = 500; // TODO: CHANGE THIS SO ITS NOT HARDCODED
-    canvas.height = 500;
-    canvas.style.backgroundColor = 'white'; 
+    
+    // Set dynamic sizing for canvas
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
 
     drawingDiv.innerHTML = ''; 
-    drawingDiv.appendChild(canvas); 
+    drawingDiv.appendChild(canvas);
 
     // Initialize Paper.js
     paper.setup(canvas);
@@ -16,11 +15,10 @@ function createEndScreenCanvas(drawingDiv) {
     return canvas;
 }
 
-function displayPlayerDesign(playerDesigns,translation) {
+function displayPlayerDesign(playerDesigns, translation) {
     playerDesigns.forEach(design => {
         design.paths.forEach(pathData => {
             if (pathData.paperPath) {
-                // create a NEW path from the Paper.js path data
                 let path = new paper.Path();
                 path.importJSON(JSON.stringify(pathData.generatedPath)); 
 
@@ -28,62 +26,51 @@ function displayPlayerDesign(playerDesigns,translation) {
                     Object.assign(path, pathData.lastDisplaySettings.generatedPath);
                 }
 
-                //translation for player2's design
+                // Translation for player 2's design
                 if (translation !== 0) {
                     path.translate(new paper.Point(translation, 0));
                 }
 
-                // add the path to the canvas which DISPLAYS it
+                // Add the path to the canvas which displays it
                 path.addTo(paper.project);
             }
         });
     });
 
-    // refresh the canvas
+    // Refresh the canvas
     paper.view.update();
 }
-
-
-
 
 function loadDesignFromFirebase(roomCode, drawingDiv) {
     const player1DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player1`);
     const player2DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player2`);
 
-    //variable for "is player's design loaded from firebase"
     let player1Loaded = false;
     let player2Loaded = false;
 
-
     onValue(player1DesignsRef, (snapshot) => {
         const player1Data = snapshot.val();
-        //if either player's design is empty (didnt draw anythig), use an empty list
         const restoredPlayer1DesignsData = player1Data ? restoreInvalidKeys(player1Data) : [];
         player1Loaded = true;
         
-        //repeat for player 2
         onValue(player2DesignsRef, (player2Snapshot) => {
             const player2Data = player2Snapshot.val();
             const restoredPlayer2Data = player2Data ? restoreInvalidKeys(player2Data) : [];
             player2Loaded = true;
-
 
             if (player1Loaded && player2Loaded) {
                 const canvas = createEndScreenCanvas(drawingDiv);
 
                 displayPlayerDesign(restoredPlayer1DesignsData);
 
-                const translationDistance = 250; // TODO: change so width isnt hard coded
+                const translationDistance = 250; // Change as needed based on design width
                 displayPlayerDesign(restoredPlayer2Data, translationDistance);
             }
         });
     });
 }
 
-
-
 function showEndScreen(roomCode) {
-
     const existingEndScreen = document.getElementById('endScreen');
     if (existingEndScreen) {
         existingEndScreen.remove();
@@ -92,30 +79,18 @@ function showEndScreen(roomCode) {
     const endScreenDiv = document.createElement('div');
     endScreenDiv.id = 'endScreen';
 
-    //create the title
+    // Create the title
     const title = document.createElement('div');
     title.id = 'gameTitle';
     title.textContent = 'PatchPartners';
 
-    
-    //Original approach: create a container that contains both player's drawing side by side
-    //CAN REMOVE THIS.
+    // Create a container for both players' drawings
     const drawingContainer = document.createElement('div');
-    drawingContainer.id = 'drawingContainer';
-    drawingContainer.style.display = 'flex';
+    drawingContainer.id = 'finishedDrawing';
 
-
-    const player1Div = document.createElement('div');
-    player1Div.id = 'player1Drawing';
-    player1Div.style.flex = '1';
-    player1Div.style.backgroundColor = 'white';
-    player1Div.textContent = 'Loading design...';
-    drawingContainer.appendChild(player1Div);
-
-    loadDesignFromFirebase(roomCode, player1Div);
-    paper.view.update();
+    loadDesignFromFirebase(roomCode, drawingContainer);
     
-
+    // Main Menu Button
     const mainMenuBtn = document.createElement('button');
     mainMenuBtn.id = 'mainMenuBtn';
     mainMenuBtn.textContent = 'Main Menu';
@@ -123,16 +98,22 @@ function showEndScreen(roomCode) {
         window.location.reload(); 
     };
     
-    
-
-
+    // Append elements to the end screen
     endScreenDiv.appendChild(title);
     endScreenDiv.appendChild(drawingContainer);
     endScreenDiv.appendChild(mainMenuBtn);
 
-
     document.body.appendChild(endScreenDiv);
 }
 
+// Adjust canvas size dynamically on window resize
+window.addEventListener('resize', () => {
+    const canvas = document.getElementById('endScreenCanvas');
+    if (canvas) {
+        paper.view.viewSize = new paper.Size(canvas.clientWidth, canvas.clientHeight);
+        paper.view.update();
+    }
+});
 
+// Example usage
 window.showEndScreen = showEndScreen;

@@ -32,16 +32,21 @@ body, html {
     text-align: center;
 }
 
-/* Styling for the drawing container */
+/* Make the canvas container flexible */
 #endScreen #finishedDrawing {
-    width: 500px;
-    height: 500px;
+    width: 80%; /* Set a percentage width for better responsiveness */
+    max-width: 500px; /* Maximum width constraint */
+    height: auto; /* Allow height to scale with the width */
+    aspect-ratio: 1 / 1; /* Maintain square aspect ratio */
     background-color: #ffffff; /* White background for the drawing */
     border: 2px dashed black;
     margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Styling for the main menu button */
+/* Ensure the main menu button is centered */
 #endScreen #mainMenuBtn {
     padding: 10px 20px;
     font-size: 1.5em;
@@ -50,5 +55,5 @@ body, html {
     border: none;
     background-color: #00A3FF;
     color: #ffffff;
+    text-align: center;
 }
-

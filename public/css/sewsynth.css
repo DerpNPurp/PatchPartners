@@ -44,7 +44,7 @@ html, body {
 .fill-area {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: stretch; /* Align items in Cross Axis */
     align-content: stretch; /* Extra space in Cross Axis */
     width: 100%; /* Full width */
@@ -94,6 +94,37 @@ html, body {
     background: #ffffff;
     box-sizing: border-box;
 }
+
+/* Container for character and speech bubble */
+#characterContainer {
+    position: absolute;
+    top: 50%;
+    right: 50px; /* Align to the right of the screen */
+    transform: translateY(-50%); /* Center vertically */
+    display: flex;
+    flex-direction: row-reverse; /* Place character to the right of the speech bubble */
+    align-items: center;
+    pointer-events: none; /* Disable interactions */
+    z-index: 1000;
+}
+
+/* Styling for the character image */
+#gameRmSav {
+    width: 100px;
+    height: auto;
+    z-index: 1001;
+}
+
+/* Styling for the speech bubble */
+#speechBubble {
+    position: relative;
+    margin-right: -80px; /* Add space between the bubble and character */
+    width: 300px; 
+    top: -100px;
+    height: auto;
+    z-index: 1000;
+}
+
 
 /* Timer Styling */
 #timer {
