@@ -52,3 +52,13 @@ body, html {
     color: #ffffff;
 }
 
+#endScreenCanvas {
+    width: 100%;
+    height: auto;
+    object-fit: contain; /* ensures proper scaling */
+}
+
+/* #endScreenCanvas {
+    width: 500px !important;
+    height: 500px !important;
+} */

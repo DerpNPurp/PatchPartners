@@ -9,9 +9,60 @@ function createEndScreenCanvas(drawingDiv) {
     drawingDiv.appendChild(canvas); 
 
     paper.setup(canvas);
+    
+    if (paper.tool){
+        paper.tool.remove();
+    }
+
+    // Add an event listener for resizing
+    window.addEventListener('resize', () => setCanvasSize(canvas));
 
     return canvas;
 }
+
+
+// Function to set canvas size based on the screen dimensions
+function setCanvasSize(canvas) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const newSize = calculateCanvasSize(width, height);
+    
+    const oldCanvasSize = canvas.width; // Store the old canvas size before updating
+    canvas.width = newSize;
+    canvas.height = newSize;
+    canvas.style.width = `${newSize}px`;
+    canvas.style.height = `${newSize}px`;
+
+    // Update the Paper.js view size accordingly
+    if (paper.view) {
+        paper.view.viewSize = new paper.Size(newSize, newSize);
+        
+        // Calculate the scaling factor
+        const scale = newSize / oldCanvasSize;
+        if (scale !== 1) {
+            scaleDrawings(scale); // Scale the existing drawings
+        }
+
+        paper.view.update();
+    }
+}
+
+
+
+function scaleDrawings(scale) {
+    if (paper.project) {
+        paper.project.activeLayer.scale(scale);
+    }
+}
+
+// Function to calculate the canvas size based on the screen dimensions
+// The canvas size must be a multiple of 100px
+function calculateCanvasSize(width, height) {
+    // Calculate the smallest dimension and round it down to the nearest 100px
+    let minNumber = Math.min(width, height);
+    return Math.floor(minNumber / 100) * 100 - 100;
+}
+
 
 function displayPlayerDesign(playerDesigns, translation) {
     playerDesigns.forEach(design => {
@@ -45,6 +96,17 @@ function displayPlayerDesign(playerDesigns, translation) {
     //Refresh the canvas
     paper.view.update();
 }
+
+
+window.addEventListener('resize', () => {
+    const canvas = document.getElementById('endScreenCanvas');
+    if (canvas) {
+        paper.view.viewSize = new paper.Size(500, 500);
+        canvas.width = 500; 
+        canvas.height = 500;
+        paper.view.update();
+    }
+});
 
 function loadDesignFromFirebase(roomCode, drawingDiv, callback) {
     const player1DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player1`);
