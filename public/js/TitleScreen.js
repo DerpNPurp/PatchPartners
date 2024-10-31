@@ -11,7 +11,6 @@ export class TitleScreen {
                 label: "START",
                 description: "Press to begin choosing which mode to play",
                 handler: () => {
-                    resolve();
                     this.showStartScreen(resolve);
                 }
             },
@@ -116,7 +115,8 @@ export class TitleScreen {
         pinkBox.classList.add("pinkBox");
 
         const image = document.createElement("img");
-        image.src = this.getRandomSav();
+        image.src = TitleScreen.getRandomSav();
+        ;
         pinkBox.appendChild(image);
 
         this.rightSideElement.appendChild(pinkBox);
@@ -484,7 +484,7 @@ export class TitleScreen {
     }
     
 
-    getRandomSav(){
+    static getRandomSav(){
         const savAssets = [
             'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Disgust.png', //disgust
             'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/SAV_Nervous.png', //disgust looking left
