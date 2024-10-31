@@ -85,7 +85,7 @@ DesignGenerator.prototype.parseToolParams =  function(params){
 		    //    break;
 		    case "sketchNoise":
 		        newPath = this.applyNoiseToPath(params.path, this.gatherGenerationParams(params.generationSettings, params.type));
-		        
+		         
 		        break;
 		    case "sketchHighNoise":
 		    	newPath = this.apply1DNoiseToPath(params.path, this.gatherGenerationParams(params.generationSettings, params.type));

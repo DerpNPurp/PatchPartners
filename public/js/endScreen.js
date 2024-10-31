@@ -9,65 +9,139 @@ function createEndScreenCanvas(drawingDiv) {
     drawingDiv.innerHTML = ''; 
     drawingDiv.appendChild(canvas);
 
-    // Initialize Paper.js
     paper.setup(canvas);
+    
+    if (paper.tool){
+        paper.tool.remove();
+    }
+
+    // Add an event listener for resizing
+    window.addEventListener('resize', () => setCanvasSize(canvas));
 
     return canvas;
 }
+
+
+// Function to set canvas size based on the screen dimensions
+function setCanvasSize(canvas) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const newSize = calculateCanvasSize(width, height);
+    
+    const oldCanvasSize = canvas.width; // Store the old canvas size before updating
+    canvas.width = newSize;
+    canvas.height = newSize;
+    canvas.style.width = `${newSize}px`;
+    canvas.style.height = `${newSize}px`;
+
+    // Update the Paper.js view size accordingly
+    if (paper.view) {
+        paper.view.viewSize = new paper.Size(newSize, newSize);
+        
+        // Calculate the scaling factor
+        const scale = newSize / oldCanvasSize;
+        if (scale !== 1) {
+            scaleDrawings(scale); // Scale the existing drawings
+        }
+
+        paper.view.update();
+    }
+}
+
+
+
+function scaleDrawings(scale) {
+    if (paper.project) {
+        paper.project.activeLayer.scale(scale);
+    }
+}
+
+// Function to calculate the canvas size based on the screen dimensions
+// The canvas size must be a multiple of 100px
+function calculateCanvasSize(width, height) {
+    // Calculate the smallest dimension and round it down to the nearest 100px
+    let minNumber = Math.min(width, height);
+    return Math.floor(minNumber / 100) * 100 - 100;
+}
+
 
 function displayPlayerDesign(playerDesigns, translation) {
     playerDesigns.forEach(design => {
         design.paths.forEach(pathData => {
             if (pathData.paperPath) {
-                let path = new paper.Path();
-                path.importJSON(JSON.stringify(pathData.generatedPath)); 
+                try {
+                    //Create a NEW path from the Paper.js path data
+                    let path = new paper.Path();
+                    path.importJSON(JSON.stringify(pathData.generatedPath)); 
 
-                if (pathData.lastDisplaySettings && pathData.lastDisplaySettings.generatedPath) {
-                    Object.assign(path, pathData.lastDisplaySettings.generatedPath);
+                    //Apply last display settings
+                    if (pathData.lastDisplaySettings && pathData.lastDisplaySettings.generatedPath) {
+                        Object.assign(path, pathData.lastDisplaySettings.generatedPath);
+                    }
+
+                    //Apply translation for player 2's design
+                    if (translation !== 0) {
+                        path.translate(new paper.Point(translation, 0));
+                    }
+
+                    //Add the path to the canvas which displays it
+                    path.addTo(paper.project);
+
+                } catch (error) {
+                    console.error("Error displaying design path: ", error);
                 }
-
-                // Translation for player 2's design
-                if (translation !== 0) {
-                    path.translate(new paper.Point(translation, 0));
-                }
-
-                // Add the path to the canvas which displays it
-                path.addTo(paper.project);
             }
         });
     });
 
-    // Refresh the canvas
+    //Refresh the canvas
     paper.view.update();
 }
 
-function loadDesignFromFirebase(roomCode, drawingDiv) {
+
+window.addEventListener('resize', () => {
+    const canvas = document.getElementById('endScreenCanvas');
+    if (canvas) {
+        paper.view.viewSize = new paper.Size(500, 500);
+        canvas.width = 500; 
+        canvas.height = 500;
+        paper.view.update();
+    }
+});
+
+function loadDesignFromFirebase(roomCode, drawingDiv, callback) {
     const player1DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player1`);
     const player2DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player2`);
 
-    let player1Loaded = false;
-    let player2Loaded = false;
+    let player1Designs = null;
+    let player2Designs = null;
 
+    //Load player 1's designs
     onValue(player1DesignsRef, (snapshot) => {
         const player1Data = snapshot.val();
-        const restoredPlayer1DesignsData = player1Data ? restoreInvalidKeys(player1Data) : [];
-        player1Loaded = true;
-        
-        onValue(player2DesignsRef, (player2Snapshot) => {
-            const player2Data = player2Snapshot.val();
-            const restoredPlayer2Data = player2Data ? restoreInvalidKeys(player2Data) : [];
-            player2Loaded = true;
-
-            if (player1Loaded && player2Loaded) {
-                const canvas = createEndScreenCanvas(drawingDiv);
-
-                displayPlayerDesign(restoredPlayer1DesignsData);
-
-                const translationDistance = 250; // Change as needed based on design width
-                displayPlayerDesign(restoredPlayer2Data, translationDistance);
-            }
-        });
+        player1Designs = player1Data ? restoreInvalidKeys(player1Data) : [];
+        checkDesignsLoaded();  //Check if both players' designs are loaded
     });
+
+    //Load player 2's designs
+    onValue(player2DesignsRef, (snapshot) => {
+        const player2Data = snapshot.val();
+        player2Designs = player2Data ? restoreInvalidKeys(player2Data) : [];
+        checkDesignsLoaded();  //Check if both players' designs are loaded
+    });
+
+    //Function to check if both designs are loaded
+    function checkDesignsLoaded() {
+        if (player1Designs !== null && player2Designs !== null) {
+            const canvas = createEndScreenCanvas(drawingDiv);
+            displayPlayerDesign(player1Designs, 0); //No translation for player 1
+
+            const translationDistance = 250; //Assuming translation distance for player 2
+            displayPlayerDesign(player2Designs, translationDistance);
+
+            callback(player1Designs, player2Designs); //Pass both designs to the callback
+        }
+    }
 }
 
 function showEndScreen(roomCode) {
@@ -88,9 +162,42 @@ function showEndScreen(roomCode) {
     const drawingContainer = document.createElement('div');
     drawingContainer.id = 'finishedDrawing';
 
-    loadDesignFromFirebase(roomCode, drawingContainer);
-    
-    // Main Menu Button
+    const player1Div = document.createElement('div');
+    player1Div.id = 'player1Drawing';
+    player1Div.style.flex = '1';
+    player1Div.style.backgroundColor = 'white';
+    player1Div.textContent = 'Loading design...';
+
+    drawingContainer.appendChild(player1Div);
+
+    // Load both player's designs from Firebase
+    loadDesignFromFirebase(roomCode, player1Div, (player1Designs, player2Designs) => {
+        // After loading, create a new DesignHandler and populate it with the loaded designs
+        global.endScreenDesignHandler = new DesignHandler();
+
+        // Merge the designs from both players and add them to the DesignHandler
+        const combinedDesigns = player1Designs.concat(player2Designs); // Simple merge for example
+        combinedDesigns.forEach(design => {
+            global.endScreenDesignHandler.makeAndSetNewDesign();
+            global.endScreenDesignHandler.designs[global.endScreenDesignHandler.activeDesign].makeNewPath(design);
+        });
+
+        console.log("End screen DesignHandler initialized with combined designs.");
+    });
+
+    //Add the "Save to DST" button for the end screen
+    const saveButton = document.createElement('button');
+    saveButton.id = 'saveButton';
+    saveButton.textContent = 'Save to DST';
+    saveButton.onclick = function () {
+        if (global.endScreenDesignHandler) {
+            global.endScreenDesignHandler.saveAllDesignsToFile();  //Save the combined design to DST
+        } else {
+            console.error("DesignHandler for end screen is not initialized.");
+        }
+    };
+
+    // Main menu button
     const mainMenuBtn = document.createElement('button');
     mainMenuBtn.id = 'mainMenuBtn';
     mainMenuBtn.textContent = 'Main Menu';
@@ -101,19 +208,10 @@ function showEndScreen(roomCode) {
     // Append elements to the end screen
     endScreenDiv.appendChild(title);
     endScreenDiv.appendChild(drawingContainer);
+    endScreenDiv.appendChild(saveButton);  
     endScreenDiv.appendChild(mainMenuBtn);
 
     document.body.appendChild(endScreenDiv);
 }
 
-// Adjust canvas size dynamically on window resize
-window.addEventListener('resize', () => {
-    const canvas = document.getElementById('endScreenCanvas');
-    if (canvas) {
-        paper.view.viewSize = new paper.Size(canvas.clientWidth, canvas.clientHeight);
-        paper.view.update();
-    }
-});
-
-// Example usage
 window.showEndScreen = showEndScreen;
