@@ -1,17 +1,19 @@
 function createEndScreenCanvas(drawingDiv) {
     const canvas = document.createElement('canvas');
     canvas.id = 'endScreenCanvas';
-    
-    // Set dynamic sizing for canvas
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+
+    // Set initial size for the canvas
+    canvas.width = 500;
+    canvas.height = 500;
+    canvas.style.width = '500px';
+    canvas.style.height = '500px';
 
     drawingDiv.innerHTML = ''; 
     drawingDiv.appendChild(canvas);
 
     paper.setup(canvas);
-    
-    if (paper.tool){
+
+    if (paper.tool) {
         paper.tool.remove();
     }
 
@@ -21,70 +23,59 @@ function createEndScreenCanvas(drawingDiv) {
     return canvas;
 }
 
-
-// Function to set canvas size based on the screen dimensions
+// Function to set canvas size based on screen dimensions while keeping the original 500x500px aspect ratio
 function setCanvasSize(canvas) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const newSize = calculateCanvasSize(width, height);
-    
-    const oldCanvasSize = canvas.width; // Store the old canvas size before updating
+    const width = window.innerWidth * 0.8;
+    const height = window.innerHeight * 0.8;
+    const scaleFactor = calculateScaleFactor(width, height);
+
+    // Apply the scale factor to the canvas size
+    const newSize = 500 * scaleFactor;
     canvas.width = newSize;
     canvas.height = newSize;
     canvas.style.width = `${newSize}px`;
     canvas.style.height = `${newSize}px`;
 
-    // Update the Paper.js view size accordingly
+    // Update the Paper.js view size accordingly and rescale existing drawings
     if (paper.view) {
         paper.view.viewSize = new paper.Size(newSize, newSize);
-        
-        // Calculate the scaling factor
-        const scale = newSize / oldCanvasSize;
-        if (scale !== 1) {
-            scaleDrawings(scale); // Scale the existing drawings
-        }
-
+        scaleDrawings(scaleFactor);
         paper.view.update();
     }
 }
 
+// Function to calculate the scale factor based on the screen dimensions
+function calculateScaleFactor(width, height) {
+    const minDimension = Math.min(width, height);
+    return minDimension / 500;  // Scale relative to the original 500px size
+}
 
-
-function scaleDrawings(scale) {
+function scaleDrawings(scaleFactor) {
     if (paper.project) {
-        paper.project.activeLayer.scale(scale);
+        paper.project.activeLayer.scale(scaleFactor);
     }
 }
-
-// Function to calculate the canvas size based on the screen dimensions
-// The canvas size must be a multiple of 100px
-function calculateCanvasSize(width, height) {
-    // Calculate the smallest dimension and round it down to the nearest 100px
-    let minNumber = Math.min(width, height);
-    return Math.floor(minNumber / 100) * 100 - 100;
-}
-
 
 function displayPlayerDesign(playerDesigns, translation) {
     playerDesigns.forEach(design => {
         design.paths.forEach(pathData => {
             if (pathData.paperPath) {
                 try {
-                    //Create a NEW path from the Paper.js path data
+                    // Create a NEW path from the Paper.js path data
                     let path = new paper.Path();
                     path.importJSON(JSON.stringify(pathData.generatedPath)); 
 
-                    //Apply last display settings
+                    // Apply last display settings
                     if (pathData.lastDisplaySettings && pathData.lastDisplaySettings.generatedPath) {
                         Object.assign(path, pathData.lastDisplaySettings.generatedPath);
                     }
 
-                    //Apply translation for player 2's design
+                    // Apply translation for player 2's design
                     if (translation !== 0) {
                         path.translate(new paper.Point(translation, 0));
                     }
 
-                    //Add the path to the canvas which displays it
+                    // Add the path to the canvas which displays it
                     path.addTo(paper.project);
 
                 } catch (error) {
@@ -94,21 +85,11 @@ function displayPlayerDesign(playerDesigns, translation) {
         });
     });
 
-    //Refresh the canvas
+    // Refresh the canvas
     paper.view.update();
 }
 
-
-window.addEventListener('resize', () => {
-    const canvas = document.getElementById('endScreenCanvas');
-    if (canvas) {
-        paper.view.viewSize = new paper.Size(500, 500);
-        canvas.width = 500; 
-        canvas.height = 500;
-        paper.view.update();
-    }
-});
-
+// Load designs from Firebase and display them
 function loadDesignFromFirebase(roomCode, drawingDiv, callback) {
     const player1DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player1`);
     const player2DesignsRef = ref(window.database, `rooms/${roomCode}/designs/player2`);
@@ -116,34 +97,35 @@ function loadDesignFromFirebase(roomCode, drawingDiv, callback) {
     let player1Designs = null;
     let player2Designs = null;
 
-    //Load player 1's designs
+    // Load player 1's designs
     onValue(player1DesignsRef, (snapshot) => {
         const player1Data = snapshot.val();
         player1Designs = player1Data ? restoreInvalidKeys(player1Data) : [];
-        checkDesignsLoaded();  //Check if both players' designs are loaded
+        checkDesignsLoaded();  // Check if both players' designs are loaded
     });
 
-    //Load player 2's designs
+    // Load player 2's designs
     onValue(player2DesignsRef, (snapshot) => {
         const player2Data = snapshot.val();
         player2Designs = player2Data ? restoreInvalidKeys(player2Data) : [];
-        checkDesignsLoaded();  //Check if both players' designs are loaded
+        checkDesignsLoaded();  // Check if both players' designs are loaded
     });
 
-    //Function to check if both designs are loaded
+    // Function to check if both designs are loaded
     function checkDesignsLoaded() {
         if (player1Designs !== null && player2Designs !== null) {
             const canvas = createEndScreenCanvas(drawingDiv);
-            displayPlayerDesign(player1Designs, 0); //No translation for player 1
+            displayPlayerDesign(player1Designs, 0); // No translation for player 1
 
-            const translationDistance = 250; //Assuming translation distance for player 2
+            const translationDistance = canvas.width / 2; // Dynamic translation distance for player 2
             displayPlayerDesign(player2Designs, translationDistance);
 
-            callback(player1Designs, player2Designs); //Pass both designs to the callback
+            callback(player1Designs, player2Designs); // Pass both designs to the callback
         }
     }
 }
 
+// Initialize end screen
 function showEndScreen(roomCode) {
     const existingEndScreen = document.getElementById('endScreen');
     if (existingEndScreen) {
@@ -185,13 +167,13 @@ function showEndScreen(roomCode) {
         console.log("End screen DesignHandler initialized with combined designs.");
     });
 
-    //Add the "Save to DST" button for the end screen
+    // Add the "Save to DST" button for the end screen
     const saveButton = document.createElement('button');
     saveButton.id = 'saveButton';
     saveButton.textContent = 'Save to DST';
     saveButton.onclick = function () {
         if (global.endScreenDesignHandler) {
-            global.endScreenDesignHandler.saveAllDesignsToFile();  //Save the combined design to DST
+            global.endScreenDesignHandler.saveAllDesignsToFile();  // Save the combined design to DST
         } else {
             console.error("DesignHandler for end screen is not initialized.");
         }
