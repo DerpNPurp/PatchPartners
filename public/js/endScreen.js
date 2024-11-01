@@ -1,3 +1,5 @@
+let oldCanvasSize = 500;
+
 function createEndScreenCanvas(drawingDiv) {
     const canvas = document.createElement('canvas');
     canvas.id = 'endScreenCanvas';
@@ -25,12 +27,14 @@ function createEndScreenCanvas(drawingDiv) {
 
 // Function to set canvas size based on screen dimensions while keeping the original 500x500px aspect ratio
 function setCanvasSize(canvas) {
-    const width = window.innerWidth * 0.8;
-    const height = window.innerHeight * 0.8;
-    const scaleFactor = calculateScaleFactor(width, height);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const dimension = Math.min(width, height);
+    const canvasSize = calculateCanvasSize(dimension);
+    const scaleFactor = calculateScaleFactor(canvasSize);
 
     // Apply the scale factor to the canvas size
-    const newSize = 500 * scaleFactor;
+    const newSize = oldCanvasSize * scaleFactor;
     canvas.width = newSize;
     canvas.height = newSize;
     canvas.style.width = `${newSize}px`;
@@ -42,12 +46,16 @@ function setCanvasSize(canvas) {
         scaleDrawings(scaleFactor);
         paper.view.update();
     }
+    oldCanvasSize = newSize;
 }
 
 // Function to calculate the scale factor based on the screen dimensions
-function calculateScaleFactor(width, height) {
-    const minDimension = Math.min(width, height);
-    return minDimension / 500;  // Scale relative to the original 500px size
+function calculateCanvasSize(dimension) {
+    return Math.floor(dimension / 100) * 100 - 100;
+}
+
+function calculateScaleFactor(newCanvasSize) {
+    return newCanvasSize/oldCanvasSize;
 }
 
 function scaleDrawings(scaleFactor) {
