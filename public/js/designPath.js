@@ -1051,7 +1051,12 @@ DesignPath.prototype.generatePath = function(params){
 	
 	// GENERATE IT
 	this.derivitivePaths.generatedPath = global.mainDesignGenerator.generate(parsedParams);
-	this.derivitivePaths.generatedPath.dashArray = [4,0];
+	if(this.derivitivePaths.generatedPath == null) {
+		throw Error("Generated path is null, cannot set properties of this path")
+	} else {
+		this.derivitivePaths.generatedPath.dashArray = [4,0];
+	}
+	
 	
 	//console.log("Generated path", this.derivitivePaths.generatedPath);
 	// When we have the params nailed, make sure to check/save them

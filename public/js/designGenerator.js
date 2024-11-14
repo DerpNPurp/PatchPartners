@@ -99,10 +99,12 @@ DesignGenerator.prototype.parseToolParams =  function(params){
 		        newPath = this.applyNoiseToPathTwice(params.path, this.gatherGenerationParams(params.generationSettings, params.type));
 		        break;
 		    case "speedyDrawing":
-		        
+		        //TODO: REPLACE WITH SOMETHING ELSE! APPLY SOMETHING COOL!
+				newPath = params.path.clone();
 		        break;
 		    case "speedyEvenDrawing":
-		        
+		        //TODO: REPLACE WITH SOMETHING ELSE! APPLY SOMETHING COOL!
+				newPath = params.path.clone();
 		        break;
 		    case "echoExact":
 		        newPath = this.echoPathExactWithAngle(params.path, this.gatherGenerationParams(params.generationSettings, params.type));
