@@ -118,7 +118,7 @@ function initGameRoom(socket, roomCode, prompt, player1) {
 
         const speechBubble = document.createElement("img");
         speechBubble.id = "speechBubble";
-        speechBubble.src = 'https://cdn.discordapp.com/attachments/1161175125404680362/1299038584858480670/speech-bubble-thought-bubble-comic-bubble-transparent-free-free-png.png?ex=671bbf75&is=671a6df5&hm=e3a4ed0299e6a70da18c964eaebfa36dec42b1bbeaa8a82c726da9736c748aab&';
+        speechBubble.src = 'https://users.csc.calpoly.edu/~amgrow/patchpals/assets/speech-bubble-thought-bubble-comic-bubble-transparent-free-free-png.png';
         speechBubble.style.width = '310px';
         // Append character and speech bubble to the container
         characterContainer.appendChild(pinkBox);
@@ -446,18 +446,58 @@ function initGameRoom(socket, roomCode, prompt, player1) {
         paper.view.viewSize = new paper.Size(correctCanvasSize / 2, correctCanvasSize); // Adjust width based on player split
     }
 
+    function resizeCharacterAndBubble() {
+        const characterContainer = document.getElementById("characterContainer");
+        const gameRmSav = document.getElementById("gameRmSav");
+        const speechBubble = document.getElementById("speechBubble");
+        const canvas = document.getElementById("canvas");
+    
+        if (characterContainer && gameRmSav && speechBubble && canvas) {
+            // Get the bounding box of the canvas to calculate its right edge
+            const canvasRect = canvas.getBoundingClientRect();
+            const rightEdgeOfCanvas = canvasRect.right;
+    
+            // Set a fixed offset from the right edge of the canvas
+            const offsetFromCanvas = 20; // Offset in pixels from the canvas’s right edge
+    
+            // Position the character container close to the canvas
+            characterContainer.style.position = "absolute";
+            characterContainer.style.left = `${rightEdgeOfCanvas + offsetFromCanvas}px`; // Set left based on the canvas's right edge
+            characterContainer.style.top = "50%"; // Center vertically
+            characterContainer.style.transform = "translateY(-50%)"; // Adjust to vertically center the character container
+    
+            // Calculate available space from canvas right edge to window right edge for dynamic scaling
+            const availableSpace = window.innerWidth - rightEdgeOfCanvas - offsetFromCanvas;
+    
+            // Set dynamic width for Sav based on available space, within a range for responsiveness
+            const savWidth = Math.min(Math.max(availableSpace * 0.2, 80), 450); // 20% of available space, min 80px, max 150px
+            gameRmSav.style.width = `${savWidth}px`;
+            gameRmSav.style.height = "auto"; // Maintain aspect ratio
+    
+            // Set the width for the speech bubble, with a relative size to Sav's width
+            const bubbleWidth = Math.min(Math.max(savWidth * 1.3, 300), availableSpace * 0.6); // 1.3 times Sav's width, min 150px, max 60% of available space
+            speechBubble.style.width = `${bubbleWidth}px`;
+            speechBubble.style.height = "auto";
+        }
+    }
+    
+    
+    
+    
+
     //Initialize the app and start the game room
     function onLoad() {
-        addHtmlContent(); //Add the HTML content dynamically
+        addHtmlContent();
         document.getElementById('uploadImg').addEventListener('change', handleFileSelection, false);
-        initApp(); //Initialize canvas, design handlers, and more
-        resize(); //Perform initial resize and adjust layout
+        initApp();
+        resize();
+        resizeCharacterAndBubble(); // Initial call to set the size of Sav and bubble
     }
-
+    
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onLoad); //Load when DOM is ready
+        document.addEventListener('DOMContentLoaded', onLoad);
     } else {
-        onLoad(); //Load immediately if DOM is already ready
+        onLoad();
     }
 }
 

@@ -67,6 +67,13 @@ DesignHandler.prototype.reactivateDesign = function(design){
 //		activeDesign points to the right design
 //		the design has a new path with our pitiful length
 DesignHandler.prototype.initLivePaperJSPath = function(path, newDesign){
+	// if (this.lastSelectedLineType === "fillPath") {
+    //     // Start drawing the temporary polygon
+    //     this.temporaryPath = new paper.Path();
+    //     this.temporaryPath.strokeColor = 'black';
+    //     this.temporaryPath.strokeWidth = 1;
+    // }
+	
 	if(newDesign !== undefined && newDesign !== null && newDesign == true) {
 		this.makeAndSetNewDesign();
 	}
@@ -85,17 +92,29 @@ DesignHandler.prototype.initLivePaperJSPath = function(path, newDesign){
 // Either way, update it in designHandler and its child designs
 DesignHandler.prototype.updateLivePaperJSPath = function(path){
 	//console.log("Trying to updateLivePaperJSPath with a path", path);
-	this.designs[this.activeDesign].editPath(path);
+	// if (this.lastSelectedLineType === "fillPath" && this.temporaryPath) {
+    //     // Add segments from the new path to the temporary path
+    //     this.temporaryPath.addSegments(path.segments);
+    // } 
+	// else {
+		this.designs[this.activeDesign].editPath(path);
+	// }
 };
 
 // makes sure the action that created the path, the one of the initLivePaperJSPath, 
 // is made of the completed path as defined when mouse up occurs
 // this function also handles the deselection and such
-DesignHandler.prototype.completeLivePaperJSPath = function(path, newDesign){
-	
-	this.updatePathSelection(this.lastSelectedLineType);
-	console.log("completeLivePaperJSPath completed!"); //, path);
+DesignHandler.prototype.completeLivePaperJSPath = function(path, newDesign) {
+    // if (this.lastSelectedLineType === "fillPath" && this.temporaryPath) {
+    //     // Finalize and apply the fill pattern
+    //     this.applyFillPath(this.temporaryPath);
+    //     this.temporaryPath = null; // Clear the temporary path after filling
+    // } else {
+        this.updatePathSelection(this.lastSelectedLineType);
+    // }
+    console.log("completeLivePaperJSPath completed!");
 };
+
 
 // TODO: you want some other generateSeedPath, put that in the params
 DesignHandler.prototype.regeneratePathsInDesign = function(id, toolType){
@@ -187,7 +206,9 @@ DesignHandler.prototype.parsePathSelection = function(selected){
 		params.flattenedPath = {sewn: true};
 	} else if (selected === "path-sew-generated"){
 		params.generatedPath = {sewn: true};
-	} else {
+	} else if (selected === "fillPath") {
+        params.fillPath = { enabled: true };
+	}else {
 		// Haha! It's none of them!
 		console.log("Called showAndSelectPath on a design with selected", selected);
 	}
@@ -217,6 +238,14 @@ DesignHandler.prototype.updatePathSelection = function(selected){
 		this.designs[this.activeDesign].showAndSelectPath(parsedSelection);
 	} else {
 		console.log("Cannot update selection for a null/undefined activeDesign...");
+	}
+
+	// fill brush
+	if (this.lastSelectedLineType === "fillPath") {
+        const { enabled } = this.lastDisplaySettings.fillPath || {};
+        if (enabled) {
+            console.log("Fill brush is selected and enabled.");
+        }
 	}
 };
 
@@ -296,6 +325,17 @@ DesignHandler.prototype.regenerateAllDerivedPaths = function(inputParams){
 	// Then update their visability...
 	this.updatePathSelection(this.lastSelectedLineType);
 };
+
+/* determines if fill brush is selected */
+DesignHandler.prototype.applyFillPath = function(polygonPath) {
+    const { enabled, lineSpacing, angle } = this.lastDisplaySettings.fillPath || {};
+    if (!enabled) return; 
+
+    if (this.activeDesign !== null && this.designs[this.activeDesign]) {
+        this.designs[this.activeDesign].fillPath(lineSpacing, angle, polygonPath);
+    }
+};
+
 
 ////////////////////////////////////////////////////////////////
 ////////////////// DESIGN EVENT MANAGEMENT /////////////////////

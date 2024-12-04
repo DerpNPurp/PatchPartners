@@ -37,16 +37,24 @@ CustomTool.prototype.setCanvasToolProperties = function(event, canvasPath){
 	
 	// custom
 	if(this.drawingSettings !== null && this.drawingSettings !== undefined){
-		for (var key in this.drawingSettings) {
-		    // skip loop if the property is from prototype
-			if (!this.drawingSettings.hasOwnProperty(key)) continue;
-			
-			// Hopefully this works!!!
-			if(canvasPath[key] !== undefined){
-				canvasPath[key] = this.drawingSettings[key];
-				console.log("setting canvasTool key with value ", key, this.drawingSettings[key]);
-			} else {
-				console.log("OOOPS NO CANVAS TOOL WITH KEY ", key);
+		if (this.name === "fillBrush") {
+			// Apply fill-specific properties
+			canvasPath.fillColor = this.drawingSettings.fillColor;
+			canvasPath.strokeColor = this.drawingSettings.strokeColor;
+			canvasPath.strokeWidth = this.drawingSettings.strokeWidth || 0; // No border if undefined
+		}
+		else{
+			for (var key in this.drawingSettings) {
+				// skip loop if the property is from prototype
+				if (!this.drawingSettings.hasOwnProperty(key)) continue;
+				
+				// Hopefully this works!!!
+				if(canvasPath[key] !== undefined){
+					canvasPath[key] = this.drawingSettings[key];
+					console.log("setting canvasTool key with value ", key, this.drawingSettings[key]);
+				} else {
+					console.log("OOOPS NO CANVAS TOOL WITH KEY ", key);
+				}
 			}
 		}
 	}
@@ -304,6 +312,21 @@ var toolLibrary = {
 		// Design settings needs 1 path
 		// no generation settings
 	),
+	// fill brush
+	fillBrush: new CustomTool(
+		"fillBrush", "drawing",
+		// Drawing settings for the fill brush
+		{
+			fillColor: 'blue', // Define the fill color
+			strokeColor: 'black', // border color for the filled shape
+			strokeWidth: 1 // thickness of the border
+		},
+		// Generation settings 
+		{
+			lineSpacing: 5, // Example: Spacing for fill lines if patterned
+			angle: 45 // Example: Angle for diagonal lines
+		}
+	)
 	//////////////////////////////
 	//////// EDITING //////////
 	//////////////////////////////
