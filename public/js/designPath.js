@@ -117,7 +117,12 @@ var DesignPath = function(parentDesign, pPath){
 		flattenedPath: 				{opacity: 0.5},//, visible: true, selected: true},
 		"flattenedPath.sewnPath":	{opacity: 1},//, visible: true, selected: true},
 		generatedPath: 				{opacity: 0.5},//, visible: true, selected: true},
-		"generatedPath.sewnPath":	{opacity: 1}//, visible: true, selected: true}
+		"generatedPath.sewnPath":	{opacity: 1},//, visible: true, selected: true}
+		fillPath: {
+			enabled: false,
+			lineSpacing: 10,  // Default line spacing
+			angle: 45         // Default angle
+		}
 	};
 	
 	this.allParsedParamOptions = [	"path", "path.sewnPath", 
@@ -273,6 +278,9 @@ DesignPath.prototype.getPaperPath = function(params){
 		    case "generatedPath.sewnPath":
 		        return this.derivitivePaths.generatedPath.sewnPath;
 		        break;
+			case "fillPath": 
+                return this.fillPath();
+				break;
 		    default:
 		    	console.log("No case for parse params", this.parseParams[i]);
 		        break;
@@ -669,6 +677,49 @@ DesignPath.prototype.applyPathDrawingProperties = function(){
 	return;
 	
 };
+
+/* fill generation */
+DesignPath.prototype.fillPath = function(lineSpacing, angle = 0, polygonPath) {
+    const path = polygonPath || this.paperPath;
+    if (!path) return;
+
+    const bounds = path.bounds;
+    const angleRad = angle * Math.PI / 180;
+    const cosAngle = Math.cos(angleRad);
+    const sinAngle = Math.sin(angleRad);
+    const diagonal = Math.sqrt(bounds.width ** 2 + bounds.height ** 2);
+
+    for (let i = -diagonal; i <= diagonal; i += lineSpacing) {
+        // Calculate start and end points for each line
+        const startX = bounds.center.x + i * cosAngle;
+        const startY = bounds.center.y + i * sinAngle;
+        const endX = startX - bounds.height * sinAngle;
+        const endY = startY + bounds.height * cosAngle;
+
+        // Temporary line for intersection checking
+        const tempLine = new paper.Path.Line({
+            from: new paper.Point(startX, startY),
+            to: new paper.Point(endX, endY)
+        });
+
+        const intersections = tempLine.getIntersections(path);
+        tempLine.remove(); // Remove temporary line
+
+        // Draw lines between pairs of intersection points
+        if (intersections.length >= 2) {
+            for (let j = 0; j < intersections.length - 1; j += 2) {
+                const fillLine = new paper.Path.Line({
+                    from: intersections[j].point,
+                    to: intersections[j + 1].point,
+                    strokeColor: 'black', // Adjust as necessary
+                });
+
+                // Optionally add fillLine to an array for tracking, e.g., this.fillLines.push(fillLine)
+            }
+        }
+    }
+};
+
 
 // stitchLength is in mm
 // pixelsPerMM is the screen -> stitchLength scale conversion

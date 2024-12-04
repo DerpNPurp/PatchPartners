@@ -99,29 +99,29 @@ html, body {
 #characterContainer {
     position: absolute;
     top: 50%;
-    right: 50px; /* Align to the right of the screen */
-    transform: translateY(-50%); /* Center vertically */
+    /* right: 5%; distance from the right edge */
+    transform: translateY(-50%);
     display: flex;
-    flex-direction: row-reverse; /* Place character to the right of the speech bubble */
+    flex-direction: row-reverse;
     align-items: center;
-    pointer-events: none; /* Disable interactions */
+    pointer-events: none;
     z-index: 1000;
 }
 
-/* Styling for the character image */
+/* Character image styling */
 #gameRmSav {
-    width: 100px;
+    width: 15vw; /* Responsive width based on viewport */
+    max-width: 250px; /* Maximum width for larger screens */
     height: auto;
     z-index: 1001;
 }
 
-/* Styling for the speech bubble */
+/* Speech bubble styling */
 #speechBubble {
-    position: relative;
-    margin-right: -80px; /* Add space between the bubble and character */
-    width: 300px; 
-    top: -100px;
+    width: 25vw; /* Responsive width based on viewport */
+    max-width: 200px; /* Maximum width for larger screens */
     height: auto;
+    margin-right: -20px; /* Adjust bubble spacing */
     z-index: 1000;
 }
 

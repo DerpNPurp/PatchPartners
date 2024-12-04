@@ -123,6 +123,20 @@ DesignGenerator.prototype.parseToolParams =  function(params){
 				break;
 				
 		    
+			case "fillBrush":
+				if (!params.path) {
+					console.error("FillBrush requires a valid path!");
+					return null;
+				}
+			
+				if (!params.path.closed) {
+					console.warn("Path is open. Automatically closing the path for fillBrush.");
+					params.path.closePath();
+				}
+			
+				newPath = params.path.clone(); // Ensure it creates a valid new path
+				break;
+				
 		    default:
 		    	console.log("No case for parsing tool params.type", params);
 		        break;

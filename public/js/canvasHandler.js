@@ -78,26 +78,35 @@ var CanvasHandler = function(canvasID){
 		////////////////////////////////////////////////////////////////////
 	};
 	
-	this.drawingTool.onMouseUp = function(event){
-		//console.log("*** mouseUP! ***", path);
-		//path.selected = false;
-		global.mainDesignHandler.completeLivePaperJSPath();
-		/*
-		try{
-			//global.mainDesignHandler.addPaperJSPath(path, true);
-			global.mainDesignHandler.actionDesignCreate({
-				"obj" : global.mainDesignHandler,
-				"path" : path
-				// design must be true for actionDesignCreate
-			});
-		} catch (e){
-			global.mainErrorHandler.error(e);
-		}*/
-		
-		//TODO: deselect the path
-		
-		//console.log("deselected", path);
+	this.drawingTool.onMouseUp = function(event) {
+		try {
+			// Ensure we have a valid path
+			if (!path) {
+				console.warn("No active path found on mouse up.");
+				return;
+			}
+	
+			if (global.selectedTool === "fillBrush") {
+				// Close the path if it's not already closed
+				if (!path.closed) {
+					console.warn("Path is open. Automatically closing the path.");
+					path.closePath();
+				}
+	
+				// Pass the path to DesignHandler for filling
+				global.mainDesignHandler.applyFillPath(path);
+			} else {
+				// Complete the live path creation for other tools
+				global.mainDesignHandler.completeLivePaperJSPath(path, true);
+			}
+		} catch (error) {
+			console.error("Error during mouse up event:", error);
+		} finally {
+			// Always reset the path to avoid lingering state
+			path = null;
+		}
 	};
+	
 	
 	
 	this.customTool = global.toolLibrary.plainLine;
