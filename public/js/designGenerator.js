@@ -115,6 +115,13 @@ DesignGenerator.prototype.parseToolParams =  function(params){
 		    case "plainSatin":
 		        newPath = this.applySatinToPath(params.path, this.gatherGenerationParams(params.generationSettings, params.type));
 		        break;
+			case "thickSatin":
+				newPath = this.applyThickSatinToPath(
+					params.path,
+					this.gatherGenerationParams(params.generationSettings, params.type)
+				);
+				break;
+				
 		    
 		    default:
 		    	console.log("No case for parsing tool params.type", params);
@@ -381,6 +388,92 @@ DesignGenerator.prototype.apply1DNoiseToPath = function(path, params){
 };
 
 
+/**
+ * Helper function to generate an offset path.
+ * @param {Path} path - The base path to offset.
+ * @param {number} offset - The distance to offset the path.
+ * @returns {Path} - The offset path.
+ */
+DesignGenerator.prototype.generateOffsetPath = function (path, offset) {
+    // Make a clone of the original path (don't modify the original)
+    const offsetPath = path.clone();
+
+
+    for (let i = 0; i < offsetPath.segments.length; i++) {
+        const segment = offsetPath.segments[i];
+
+        // Calculate tangent vector
+        const tangentVector =
+            i < offsetPath.segments.length - 1
+                ? offsetPath.segments[i + 1].point.subtract(segment.point)
+                : segment.point.subtract(offsetPath.segments[i - 1].point);
+
+        if (!tangentVector || tangentVector.length === 0) {
+            console.error("Invalid tangent vector detected -- skipping segment:", segment);
+            continue;
+        }
+
+        // Calculate normal vector
+		// TO FIND THE NORMAL VECTOR, swap the tangent vector's x and y components and negate one (-y, x).
+        const normalVector = new Point(-tangentVector.y, tangentVector.x).normalize();
+        if (!normalVector || isNaN(normalVector.x) || isNaN(normalVector.y)) {
+            console.error("Invalid normal vector detected:", normalVector);
+            continue;
+        }
+
+        // Apply offset using the normal vector
+        segment.point.x += normalVector.x * offset;
+        segment.point.y += normalVector.y * offset;
+    }
+
+    offsetPath.simplify();
+    return offsetPath;
+};
+
+
+
+DesignGenerator.prototype.applyThickSatinToPath = function (path, params) {
+    // Make sure input path is valid
+    if (!path || !path.segments || path.segments.length < 2) {
+        console.error("Invalid path provided to applyThickSatinToPath:", path);
+        return null;
+    }
+
+    // Default parameter values
+    const thickness = params?.thickness ?? 10;
+    const freq = params?.freq ?? 2; // Determines density of offset lines
+    const low = params?.low ?? -thickness / 2;
+    const high = params?.high ?? thickness / 2;
+
+    console.log("Thick Satin Brush Params:", { thickness, freq, low, high });
+
+    // Array to store offset paths
+    const offsetPaths = [];
+
+    // Generate offset paths in both directions
+    for (let offset = low; offset <= high; offset += freq) {
+        const offsetPath = this.generateOffsetPath(path, offset);
+        if (offsetPath) {
+            offsetPaths.push(offsetPath);
+        }
+    }
+
+    // Combine all offset paths into a CompoundPath
+    if (offsetPaths.length === 0) {
+        console.error("No offset paths were generated for thick satin brush.");
+        return null;
+    }
+
+    const thickSatinPath = new CompoundPath({
+        children: offsetPaths,
+        strokeColor: params?.strokeColor || "blue",
+        closed: false,
+    });
+
+    console.log("Thick Satin Path successfully generated.");
+    return thickSatinPath;
+};
+
 DesignGenerator.prototype.applySatinToPath = function(path, params){
 	var paramList = ["num_iterations", "persistence", "freq", "low", "high"];
 	
@@ -421,6 +514,9 @@ DesignGenerator.prototype.applySatinToPath = function(path, params){
 	return newPath;
 	
 };
+
+
+
 
 
 // Applies two sets of noise at different parts of the length

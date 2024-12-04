@@ -1023,67 +1023,120 @@ DesignPath.prototype.parseGenerationParameters = function(params){
 
 };
 
+
+// Pre: paperPath is not null, otherwise return 
+//      
+// Post: this.derivitivePaths.generatedPath is set if this.paperPath is not null
+//       this.derivitivePaths.generatedPath.sewn is recalculated if it was not null
+//       this.dirtyPaths.generatedPath = false
+DesignPath.prototype.generatePath = function (params) {
+    // Check dependencies
+    if (this.paperPath === null) {
+        console.error("generatePath was called with a null paperPath. Cannot proceed."); // Debug log
+        return;
+    }
+
+    // clean up old, dirty path
+    if (this.derivitivePaths.generatedPath !== null) {
+        // Clean up old generatedPath
+        if (typeof this.derivitivePaths.generatedPath.remove === 'function') {
+            console.log("Removing existing generatedPath..."); // Log for remove operation
+            this.derivitivePaths.generatedPath.remove();
+        } else {
+            console.error("Generated path is invalid or does not have a remove function:", this.derivitivePaths.generatedPath); // New: Error handling
+        }
+        this.derivitivePaths.generatedPath = null; // Ensure reset of the generatedPath reference
+    }
+
+    try {
+        // Parse and validate generation parameters
+        const parsedParams = this.parseGenerationParameters(params);
+
+        // GENERATE IT
+        // Use the DesignGenerator to create the generatedPath
+        this.derivitivePaths.generatedPath = global.mainDesignGenerator.generate(parsedParams);
+
+        if (!this.derivitivePaths.generatedPath) {
+            // Catch null or undefined paths
+            throw new Error("Generated path is null or undefined.");
+        }
+
+        // Set additional properties for the generated path
+        this.derivitivePaths.generatedPath.dashArray = [4, 0];
+        console.log("Generated path successfully created:", this.derivitivePaths.generatedPath); // Log to see if it worked!!!
+
+    } catch (error) {
+        console.error("Error in generatePath:", error); 
+        this.derivitivePaths.generatedPath = null; // Reset to ensure no invalid state
+    }
+
+    // FLAG IS NOW CLEAN
+    this.dirtyPaths.generatedPath = false;
+};
+
+
+
 // Pre: paperPath is not null, otherwise return 
 //      
 // Post: this.derivitivePaths.generatedPath is set if this.paperPath is not null
 //       this.derivitivePaths.generatedPath.sewn is recalculated if it was not null
 //       this.dirtyPaths.generatedPath = false
 
-DesignPath.prototype.generatePath = function(params){
-	// Check dependencies
-	if(this.paperPath === null){
-		throw new Error("Should not be calling generatePath without a paperPath");
-		return;
-	}
+// DesignPath.prototype.generatePath = function(params){
+// 	// Check dependencies
+// 	if(this.paperPath === null){
+// 		throw new Error("Should not be calling generatePath without a paperPath");
+// 		return;
+// 	}
 	
 
-	// clean up old, dirty path
-	if(this.derivitivePaths.generatedPath !== null){
-		if(this.derivitivePaths.generatedPath.sewnPath !== null){
-			this.derivitivePaths.generatedPath.sewnPath.remove();
-			this.derivitivePaths.generatedPath.sewnPath = null;
-		}
-		this.derivitivePaths.generatedPath.remove();
-		this.derivitivePaths.generatedPath = null;
-	}
+// 	// clean up old, dirty path
+// 	if(this.derivitivePaths.generatedPath !== null){
+// 		if(this.derivitivePaths.generatedPath.sewnPath !== null){
+// 			this.derivitivePaths.generatedPath.sewnPath.remove();
+// 			this.derivitivePaths.generatedPath.sewnPath = null;
+// 		}
+// 		this.derivitivePaths.generatedPath.remove();
+// 		this.derivitivePaths.generatedPath = null;
+// 	}
 	
-	var parsedParams = this.parseGenerationParameters(params);
+// 	var parsedParams = this.parseGenerationParameters(params);
 	
-	// GENERATE IT
-	this.derivitivePaths.generatedPath = global.mainDesignGenerator.generate(parsedParams);
-	if(this.derivitivePaths.generatedPath == null) {
-		throw Error("Generated path is null, cannot set properties of this path")
-	} else {
-		this.derivitivePaths.generatedPath.dashArray = [4,0];
-	}
-	
-	
-	//console.log("Generated path", this.derivitivePaths.generatedPath);
-	// When we have the params nailed, make sure to check/save them
-	/*
-	if(params === undefined || params.flatness === undefined){
-		if(this.lastUsedLineParams !== undefined && 
-			this.lastUsedLineParams !== null &&
-			this.lastUsedLineParams.flatness !== undefined){
-			this.derivitivePaths.flattenedPath.flatten(this.lastUsedLineParams.flatness);
-		} else {
-			console.log("using default path settings in generateFlattenedPath");
-			//  Part of Paper.js
-			this.derivitivePaths.flattenedPath.flatten(); // default is 2.5, it is the maximum error allowed
-		}
-	} else {
-		this.setLastUsedLineParams(params);
-		this.derivitivePaths.flattenedPath.flatten(params.flatness);
-	}
-	*/
-	// regenerate sewn path
-	// TODO: Make sewing paths work
-	//this.derivitivePaths.generatedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.generatedPath));
+// 	// GENERATE IT
+// 	this.derivitivePaths.generatedPath = global.mainDesignGenerator.generate(parsedParams);
+// 	if(this.derivitivePaths.generatedPath == null) {
+// 		throw Error("Generated path is null, cannot set properties of this path")
+// 	} else {
+// 		this.derivitivePaths.generatedPath.dashArray = [4,0];
+// 	}
 	
 	
-	// FLAG IS NOW CLEAN
-	this.dirtyPaths.generatedPath = false;
-};
+// 	//console.log("Generated path", this.derivitivePaths.generatedPath);
+// 	// When we have the params nailed, make sure to check/save them
+// 	/*
+// 	if(params === undefined || params.flatness === undefined){
+// 		if(this.lastUsedLineParams !== undefined && 
+// 			this.lastUsedLineParams !== null &&
+// 			this.lastUsedLineParams.flatness !== undefined){
+// 			this.derivitivePaths.flattenedPath.flatten(this.lastUsedLineParams.flatness);
+// 		} else {
+// 			console.log("using default path settings in generateFlattenedPath");
+// 			//  Part of Paper.js
+// 			this.derivitivePaths.flattenedPath.flatten(); // default is 2.5, it is the maximum error allowed
+// 		}
+// 	} else {
+// 		this.setLastUsedLineParams(params);
+// 		this.derivitivePaths.flattenedPath.flatten(params.flatness);
+// 	}
+// 	*/
+// 	// regenerate sewn path
+// 	// TODO: Make sewing paths work
+// 	//this.derivitivePaths.generatedPath.sewnPath = this.roundPathPoints(this.calcSewnPath(this.derivitivePaths.generatedPath));
+	
+	
+// 	// FLAG IS NOW CLEAN
+// 	this.dirtyPaths.generatedPath = false;
+// };
 
 DesignPath.prototype.toJSON = function() {
     return {

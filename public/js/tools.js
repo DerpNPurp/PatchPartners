@@ -161,6 +161,21 @@ var toolLibrary = {
 		}
 
 	),
+	thickSatin: new CustomTool(
+        "thickSatin", // Name
+        "drawing",    // Type
+        {
+            strokeColor: "purple" // Default color for visual distinction
+        },
+        {
+            thickness: 10,        // Default thickness
+            freq: 2,              // Frequency for smoothness
+            low: -10,             // Offset start (negative side)
+            high: 10              // Offset end (positive side)
+        }
+    ),
+
+
 	sketchNoise: new CustomTool(
 		"sketchNoise", "drawing",
 		// Drawing settings for the line. These override the defaults
@@ -304,6 +319,7 @@ var toolLibrary = {
 		// Design settings needs 1 path
 		// no generation settings
 	),
+	
 	//////////////////////////////
 	//////// EDITING //////////
 	//////////////////////////////
