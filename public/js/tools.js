@@ -170,16 +170,15 @@ var toolLibrary = {
 
 	),
 	thickSatin: new CustomTool(
-        "thickSatin", // Name
-        "drawing",    // Type
+        "thickSatin", 
+        "drawing",   
         {
-            strokeColor: "purple" // Default color for visual distinction
+            strokeColor: "purple" 
         },
         {
-            thickness: 10,        // Default thickness
-            freq: 2,              // Frequency for smoothness
-            low: -10,             // Offset start (negative side)
-            high: 10              // Offset end (positive side)
+            thickness: 20,        
+            freq: .5,          // Reminder: the lower the frequency is, the more tightly dense the stitch is
+
         }
     ),
 

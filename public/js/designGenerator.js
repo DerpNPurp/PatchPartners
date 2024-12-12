@@ -402,12 +402,6 @@ DesignGenerator.prototype.apply1DNoiseToPath = function(path, params){
 };
 
 
-/**
- * Helper function to generate an offset path.
- * @param {Path} path - The base path to offset.
- * @param {number} offset - The distance to offset the path.
- * @returns {Path} - The offset path.
- */
 DesignGenerator.prototype.generateOffsetPath = function (path, offset) {
     // Make a clone of the original path (don't modify the original)
     const offsetPath = path.clone();
@@ -446,7 +440,7 @@ DesignGenerator.prototype.generateOffsetPath = function (path, offset) {
 
 
 
-DesignGenerator.prototype.applyThickSatinToPath = function (path, params) {
+DesignGenerator.prototype.applySnakeToPath = function (path, params) {
     // Make sure input path is valid
     if (!path || !path.segments || path.segments.length < 2) {
         console.error("Invalid path provided to applyThickSatinToPath:", path);
@@ -456,8 +450,8 @@ DesignGenerator.prototype.applyThickSatinToPath = function (path, params) {
     // Default parameter values
     const thickness = params?.thickness ?? 10;
     const freq = params?.freq ?? 2; // Determines density of offset lines
-    const low = params?.low ?? -thickness / 2;
-    const high = params?.high ?? thickness / 2;
+    const low = -thickness / 2;
+    const high = thickness / 2;
 
     console.log("Thick Satin Brush Params:", { thickness, freq, low, high });
 
@@ -487,6 +481,65 @@ DesignGenerator.prototype.applyThickSatinToPath = function (path, params) {
     console.log("Thick Satin Path successfully generated.");
     return thickSatinPath;
 };
+
+DesignGenerator.prototype.applyThickSatinToPath = function (path, params) {
+    // Make sure input path is valid
+    if (!path || !path.segments || path.segments.length < 2) {
+        console.error("Invalid path provided to applyThickSatinToPath:", path);
+        return null;
+    }
+
+    // Make sure there are default parameter values
+    const thickness = params?.thickness ?? 10;
+    const freq = params?.freq ?? 2; 			// The lower the freq, the higher the density
+    const low = thickness/2;				// Low and high should be the same but can set them for testing
+    const high = thickness/2; 
+
+    console.log("Thick Satin Brush Params:", { thickness, freq, low, high });
+
+    // Path to represent the new generated zig-zag stitch
+    const zigzagPath = new Path();
+    
+    // Loop through each segment in the path
+    for (let i = 0; i < path.segments.length - 1; i++) {
+        const currentPoint = path.segments[i].point;
+        const nextPoint = path.segments[i + 1].point;
+
+        // Calculate the tangent vector between current and next point
+        const tangentVector = nextPoint.subtract(currentPoint).normalize();
+
+        // Calculate the normal vector (perpendicular to tangent)
+        const normalVector = new Point(-tangentVector.y, tangentVector.x).normalize();
+
+        let toggle = true; // Used to alternate between top and bottom for zigzag connection
+
+        // Loop to create zig-zag pattern between perpendicular lines along the path
+        for (let offset = low; offset <= high; offset += freq) {
+            // Calculate top and bottom points for the perpendicular line
+            const topPoint = currentPoint.add(normalVector.multiply(offset));
+            const bottomPoint = currentPoint.subtract(normalVector.multiply(offset));
+
+            if (toggle) {
+                // Connect the bottom of the previous to the top of the current
+                zigzagPath.add(bottomPoint);
+                zigzagPath.add(topPoint);
+            } else {
+                // Connect the top of the previous to the bottom of the current
+                zigzagPath.add(topPoint);
+                zigzagPath.add(bottomPoint);
+            }
+
+            toggle = !toggle; // Flip between top and bottom
+        }
+    }
+
+    zigzagPath.strokeColor = params?.strokeColor || "blue";
+    zigzagPath.closed = false;
+
+    console.log("Thick Satin Path successfully generated.");
+    return zigzagPath;
+};
+
 
 DesignGenerator.prototype.applySatinToPath = function(path, params){
 	var paramList = ["num_iterations", "persistence", "freq", "low", "high"];
