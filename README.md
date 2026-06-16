@@ -10,9 +10,13 @@ Built during a research project at the [Noyce School of Applied Computing](https
 
 ## Screenshots
 
-**Drawing screen** — each player sees their half of the canvas; the partner's half is hidden (grey) until the reveal
+![Home screen](docs/home.png)
 
-![Drawing screen](docs/ui-drawing.png)
+**Drawing screen** — each player sees their half of the canvas while the partner's half stays hidden (grey)
+
+| Player A | Player B |
+|:---:|:---:|
+| ![Player A](docs/ui-player-a.png) | ![Player B](docs/ui-player-b.png) |
 
 **Reveal screen** — both halves combined at the end of the round
 
@@ -41,12 +45,12 @@ Two parameters control the output:
 - **Thickness** — stroke width (high/low offset = thickness ÷ 2)
 - **Frequency** — stitch density (lower = more stitches per unit length)
 
-![Thick Satin Brush](docs/satin-brush.jpg)
+![Thick Satin Brush](docs/satin-brush.png)
 
 #### The Happy Accident: Snake Brush
 During development, a bug caused zigzag lines to run *parallel* to the path instead of perpendicular — producing an unexpected ribbon effect. Corrected in the final version, but left as a creative curiosity.
 
-![Snake-Like Brush](docs/snake-brush.jpg)
+![Snake-Like Brush](docs/snake-brush.png)
 
 ---
 
@@ -55,7 +59,7 @@ Users trace any freehand outline; on mouse release the shape is auto-closed and 
 
 The algorithm: close path → calculate bounding box → generate scan lines → find path intersections → draw stitch lines between each intersection pair.
 
-![Fill Brush](docs/fill-brush.jpg)
+![Fill Brush](docs/fill-brush.png)
 
 ---
 
